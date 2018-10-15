@@ -5,7 +5,7 @@
 ----- Release Alpha 1.0: 'The Initial Release' -----
 	
 	+ Initial release
-	+ Added 54-blocks world
+	+ Added 48-blocks world
 	+ Added giant entity
 	+ Added block system
 	+ Added physics

@@ -6,6 +6,7 @@ class Player
 {
     b2Body* b2Handler;
 public:
-    Player(b2Body* handler);
+    Player() {}
+    Player(b2World* world);
     Vector2f getScreenPosition();
 };
