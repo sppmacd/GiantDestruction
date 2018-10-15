@@ -1,15 +1,15 @@
 #include "Settings.h"
 
-Vector2f ScreenSettings::b2PosToScreen(b2Vec2 vec)
+Vector2f ScreenSettings::b2PosToScreen(Vector2f vec)
 {
-    float x = ScreenSettings::windowSize.x/(X_BY_Y*9.f)*vec.x;
-    float y = ScreenSettings::windowSize.y/9.f*vec.y;
+    float x = ScreenSettings::getBlockSize()*vec.x;
+    float y = ScreenSettings::getBlockSize()*vec.y;
     return Vector2f(x,y);
 }
 
 float ScreenSettings::getBlockSize()
 {
-    return ScreenSettings::windowSize.y / 9.f;
+    return 32.f;
 }
 
 void ScreenRenderer::drawWorld()

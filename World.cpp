@@ -5,7 +5,7 @@
 namespace GameSettings
 {
     const int WORLD_SIZE_X = 48;
-    const int WORLD_SIZE_Y = 9;
+    const int WORLD_SIZE_Y = 18;
 }
 
 namespace BlockFlags
@@ -18,28 +18,46 @@ namespace BlockFlags
 
 
 World::World()
-: world(b2World(b2Vec2(0.f,-9.81f))), player(&world)
 {
-    b2BodyDef def;
-    def.userData = this;
-    terrainBody = world.CreateBody(&def);
-
+    int hh = GameSettings::WORLD_SIZE_Y / 2;
     for(int i = 0; i < GameSettings::WORLD_SIZE_X; i++)
-    for(int j = 0; j < GameSettings::WORLD_SIZE_Y; j++)
     {
-        Block b = Block{0,rand()%16,0,0,NULL};
+        for(int j = 0; j < GameSettings::WORLD_SIZE_Y; j++)
+        {
+            Block b;
+            b.heightType = 0;
+            b.meta = 0;
 
-        if(rand()%2==0)
-            b.setFlag(BlockFlags::WORLD_BACK_LAYER);
+            hh += rand() % 3 - 1;
 
-        setBlock(i,j,b);
+            if(hh > GameSettings::WORLD_SIZE_Y - 3)
+                hh -= 2;
+            else if(hh < 5)
+                hh += 2;
+
+            if(j < hh)
+            {
+                b.blockType = 0;
+                b.setFlag(BlockFlags::WORLD_BACK_LAYER);
+            }
+            else if(j == hh)
+            {
+                b.blockType = 3; //Grass
+            }
+            else
+            {
+                b.blockType = 1; //Stone
+            }
+
+            setBlock(i,j,b);
+        }
     }
 }
 
 void World::update()
 {
     ScreenSettings::currentWorldView.setCenter(player.getScreenPosition());
-    //world.Step(1/60.f, 10, 10);
+    player.update();
 }
 
 void World::setBlock(int _x, int _y, World::Block& block)
@@ -47,35 +65,26 @@ void World::setBlock(int _x, int _y, World::Block& block)
     int x = max(0, min(_x, GameSettings::WORLD_SIZE_X));
     int y = max(0, min(_y, GameSettings::WORLD_SIZE_Y));
 
-    //Update the body stats
-
-    b2Fixture* terr = terrainBody->GetFixtureList();
-    if(terrainBody->GetFixtureCount() != 0)
-    do
-    {
-        if(block.hasFlag(BlockFlags::WORLD_BACK_LAYER) && !getBlock(x,y).hasFlag(BlockFlags::WORLD_BACK_LAYER))
-        {
-            terrainBody->DestroyFixture(terr);
-            break;
-        }
-        else if(!block.hasFlag(BlockFlags::WORLD_BACK_LAYER) && getBlock(x,y).hasFlag(BlockFlags::WORLD_BACK_LAYER))
-        {
-            b2PolygonShape shape;
-            shape.SetAsBox(1.f, 1.f);
-            terrainBody->CreateFixture(&shape, 1.f);
-        }
-    }while((terr = terr->GetNext()));
-
-    // Update block
     blocks[x][y].blockType = block.blockType;
     blocks[x][y].flags = block.flags;
     blocks[x][y].heightType = block.heightType;
     blocks[x][y].meta = block.meta;
 }
 
-World::Block World::getBlock(int x, int y)
+void World::movePlayer(float x, float y)
 {
-    return blocks[max(0, min(x, GameSettings::WORLD_SIZE_X))][max(0, min(y, GameSettings::WORLD_SIZE_Y))];
+    player.move(x,y);
+}
+
+World::Block World::getBlock(int _x, int _y)
+{
+    int x = max(-1, min(_x, GameSettings::WORLD_SIZE_X+1));
+    int y = max(-1, min(_y, GameSettings::WORLD_SIZE_Y+1));
+
+    if(x == -1 || x == GameSettings::WORLD_SIZE_X+1 || y == -1 || y == GameSettings::WORLD_SIZE_Y+1)
+        return World::Block{0,0,0,0x1}; //air
+    else
+        return blocks[x][y];
 }
 
 void World::draw(RenderWindow& wnd)
@@ -84,23 +93,28 @@ void World::draw(RenderWindow& wnd)
     int startX = player.getScreenPosition().x/bsize;
     int startY = player.getScreenPosition().y/bsize;
 
-    for(int i = startX - 8; i < startX + 8; i++)
-    for(int j = startY - 5; j < startY + 3; j++)
+    for(int i = startX - 16; i < startX + 16; i++)
+    for(int j = startY - 9; j < startY + 9; j++)
     {
         World::Block block = getBlock(i,j);
-        RectangleShape rs(Vector2f(bsize, bsize*ScreenSettings::X_BY_Y));
+        RectangleShape rs(Vector2f(bsize, bsize));
 
-        int c1 = block.blockType*16;
         int alpha = block.hasFlag(BlockFlags::WORLD_BACK_LAYER) ? 100 : 255;
-        rs.setFillColor(Color(c1,c1,c1, alpha));
-        rs.setPosition(bsize*i,bsize*j*ScreenSettings::X_BY_Y);
-        rs.setOutlineColor(Color::White);
-        rs.setOutlineThickness(1.f);
+
+        switch(block.blockType)
+        {
+            case 0: rs.setFillColor(Color(0,0,0,alpha)); break;
+            case 1: rs.setFillColor(Color(128,128,128,alpha)); break;
+            case 3: rs.setFillColor(Color(0,128,0,alpha)); break;
+            default: rs.setFillColor(Color(255,255,255,alpha)); break;
+        }
+
+        rs.setPosition(ScreenSettings::b2PosToScreen(Vector2f(i,j)));
         wnd.draw(rs);
     }
 
     //player
-    RectangleShape rs(Vector2f(bsize, bsize*ScreenSettings::X_BY_Y*2.f));
+    RectangleShape rs(Vector2f(bsize, bsize*2.f));
     rs.setFillColor(Color(100,0,0));
     rs.setPosition(player.getScreenPosition());
     wnd.draw(rs);

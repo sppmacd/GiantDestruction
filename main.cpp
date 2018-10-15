@@ -23,7 +23,8 @@ int main()
 {
     ScreenSettings::window.create(sf::VideoMode(ScreenSettings::X_BY_Y*500, 500), "Giant Destruction", Style::Default ^ Style::Resize);
     ScreenSettings::window.setView(ScreenSettings::currentWorldView);
-    ScreenSettings::window.setFramerateLimit(60);
+    ScreenSettings::window.setVerticalSyncEnabled(true);
+    ScreenSettings::currentWorldView = ScreenSettings::window.getDefaultView();
 
     while (ScreenSettings::window.isOpen())
     {
@@ -35,6 +36,9 @@ int main()
         }
 
         if(Keyboard::isKeyPressed(Keyboard::Right)) GameSettings::world.movePlayer(1.f, 0.f);
+        if(Keyboard::isKeyPressed(Keyboard::Left)) GameSettings::world.movePlayer(-1.f, 0.f);
+        if(Keyboard::isKeyPressed(Keyboard::Up)) GameSettings::world.movePlayer(0.f, 1.f);
+        if(Keyboard::isKeyPressed(Keyboard::Down)) GameSettings::world.movePlayer(0.f, -1.f);
 
         ScreenSettings::window.clear();
 

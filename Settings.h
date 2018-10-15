@@ -10,7 +10,7 @@ extern Vector2u windowSize;
 extern View currentWorldView;
 extern RenderWindow window;
 
-Vector2f b2PosToScreen(b2Vec2 vec);
+Vector2f b2PosToScreen(Vector2f vec);
 float getBlockSize();
 }
 

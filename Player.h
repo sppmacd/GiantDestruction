@@ -4,9 +4,12 @@
 
 class Player
 {
-    b2Body* b2Handler;
+    Vector2f position;
+    Vector2f velocity;
+    bool moved;
 public:
-    Player() {}
-    Player(b2World* world);
+    Player();
     Vector2f getScreenPosition();
+    void move(float x, float y);
+    void update();
 };

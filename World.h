@@ -13,8 +13,6 @@ namespace BlockFlags
 
 class World
 {
-    b2World world;
-    b2Body* terrainBody;
     Player player;
 public:
     World();
@@ -24,7 +22,6 @@ public:
         int blockType : 4;
         int meta : 4;
         int flags : 4;
-        b2Body* handler;
 
         bool hasFlag(int flag);
         void setFlag(int flag);
@@ -32,10 +29,10 @@ public:
     };
 
     void update();
-    void movePlayer9
+    void movePlayer(float x, float y);
     void setBlock(int x, int y, Block& block);
     Block getBlock(int x, int y);
     void draw(RenderWindow& wnd);
 private:
-    Block blocks[48][9];
+    Block blocks[48][32];
 };
