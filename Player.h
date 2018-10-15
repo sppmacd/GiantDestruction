@@ -5,11 +5,12 @@
 class Player
 {
     Vector2f position;
-    Vector2f velocity;
     bool moved;
 public:
     Player();
+    Vector2f velocity;
     Vector2f getScreenPosition();
     void move(float x, float y);
     void update();
+    FloatRect getRect();
 };

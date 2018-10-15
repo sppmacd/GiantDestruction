@@ -12,6 +12,11 @@ void Player::move(float x, float y)
     position += Vector2f(x,y);
 }
 
+FloatRect Player::getRect()
+{
+    return FloatRect(position.x, position.y, 1.f, 3.f);
+}
+
 void Player::update()
 {
     if(moved)

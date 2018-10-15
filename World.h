@@ -26,6 +26,7 @@ public:
         bool hasFlag(int flag);
         void setFlag(int flag);
         void unsetFlag(int flag);
+        FloatRect getRect(int x, int y);
     };
 
     void update();

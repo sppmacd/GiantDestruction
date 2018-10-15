@@ -22,18 +22,18 @@ World::World()
     int hh = GameSettings::WORLD_SIZE_Y / 2;
     for(int i = 0; i < GameSettings::WORLD_SIZE_X; i++)
     {
+        hh += rand() % 3 - 1;
+
+        if(hh > GameSettings::WORLD_SIZE_Y - 3)
+            hh -= 2;
+        else if(hh < 5)
+            hh += 2;
+
         for(int j = 0; j < GameSettings::WORLD_SIZE_Y; j++)
         {
             Block b;
             b.heightType = 0;
             b.meta = 0;
-
-            hh += rand() % 3 - 1;
-
-            if(hh > GameSettings::WORLD_SIZE_Y - 3)
-                hh -= 2;
-            else if(hh < 5)
-                hh += 2;
 
             if(j < hh)
             {
@@ -58,6 +58,18 @@ void World::update()
 {
     ScreenSettings::currentWorldView.setCenter(player.getScreenPosition());
     player.update();
+
+    int startX = player.getScreenPosition().x/ScreenSettings::getBlockSize();
+    int startY = player.getScreenPosition().y/ScreenSettings::getBlockSize();
+
+    for(int i = startX - 16; i < startX + 16; i++)
+    for(int j = startY - 9; j < startY + 9; j++)
+    {
+        if(player.getRect().intersects(blocks[i][j].getRect(i,j)))
+            player.velocity = Vector2f(0.f,0.f);
+        else
+            player.velocity += Vector2f(0.f,-0.3f);
+    }
 }
 
 void World::setBlock(int _x, int _y, World::Block& block)
@@ -114,7 +126,7 @@ void World::draw(RenderWindow& wnd)
     }
 
     //player
-    RectangleShape rs(Vector2f(bsize, bsize*2.f));
+    RectangleShape rs(Vector2f(bsize, bsize*3.f));
     rs.setFillColor(Color(100,0,0));
     rs.setPosition(player.getScreenPosition());
     wnd.draw(rs);
@@ -133,4 +145,9 @@ void World::Block::setFlag(int flag)
 void World::Block::unsetFlag(int flag)
 {
     flags ^= flag;
+}
+
+FloatRect World::Block::getRect(int x, int y)
+{
+    return FloatRect(x,y,1,1);
 }
