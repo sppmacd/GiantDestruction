@@ -9,6 +9,8 @@
 	+ Added giant entity
 	+ Added block system
 	+ Added physics
+	+ Added destroying and placing blocks
+	+ Added player health
 	
 ----- Release Alpha 1.1: 'The Crafting Update' [COMING SOON] -----
 	
