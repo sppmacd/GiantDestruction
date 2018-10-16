@@ -4,12 +4,19 @@
 
 Player::Player()
 {
-    position = Vector2f(0.f, 0.f);
+    position = Vector2f(5.f, 0.f);
+    jumping = false;
 }
 
 void Player::move(float x, float y)
 {
-    position += Vector2f(x,y);
+    if(!GameSettings::world.isCollided(getRect().left+x, getRect().top+y, getRect().width, getRect().height))
+        position += Vector2f(x,y);
+    else //Reset player stat on collide
+    {
+        velocity = Vector2f(0.f,0.f);
+        jumping = false;
+    }
 }
 
 FloatRect Player::getRect()
@@ -19,11 +26,7 @@ FloatRect Player::getRect()
 
 void Player::update()
 {
-    if(moved)
-    {
-        //b2Handler->ApplyLinearVelocity(b2Vec2(0.f,0.f));
-        moved = false;
-    }
+    move(velocity.x, velocity.y);
 }
 
 Vector2f Player::getScreenPosition() //inverts Y!

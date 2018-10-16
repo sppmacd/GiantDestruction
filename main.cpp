@@ -37,8 +37,8 @@ int main()
 
         if(Keyboard::isKeyPressed(Keyboard::Right)) GameSettings::world.movePlayer(0.2f, 0.f);
         if(Keyboard::isKeyPressed(Keyboard::Left)) GameSettings::world.movePlayer(-0.2f, 0.f);
-        if(Keyboard::isKeyPressed(Keyboard::Up)) GameSettings::world.movePlayer(0.f, -0.2f);
-        if(Keyboard::isKeyPressed(Keyboard::Down)) GameSettings::world.movePlayer(0.f, -0.2f);
+        if(Keyboard::isKeyPressed(Keyboard::Up)) GameSettings::world.jump();
+        if(Keyboard::isKeyPressed(Keyboard::Down)) GameSettings::world.movePlayer(0.f, 0.2f);
 
         ScreenSettings::window.clear();
 

@@ -29,8 +29,11 @@ public:
         FloatRect getRect(int x, int y);
     };
 
+    bool isCollided(float x, float y, float sx, float sy);
     void update();
     void movePlayer(float x, float y);
+    void acceleratePlayer(float x, float y);
+    void jump();
     void setBlock(int x, int y, Block& block);
     Block getBlock(int x, int y);
     void draw(RenderWindow& wnd);

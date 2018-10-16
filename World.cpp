@@ -34,11 +34,12 @@ World::World()
             Block b;
             b.heightType = 0;
             b.meta = 0;
+            b.flags = 0;
 
             if(j < hh)
             {
                 b.blockType = 0;
-                b.setFlag(BlockFlags::WORLD_BACK_LAYER);
+                b.flags |= BlockFlags::WORLD_BACK_LAYER;
             }
             else if(j == hh)
             {
@@ -50,6 +51,7 @@ World::World()
             }
 
             setBlock(i,j,b);
+            //cout << blocks[i][j].flags << endl;
         }
     }
 }
@@ -57,21 +59,42 @@ World::World()
 void World::update()
 {
     ScreenSettings::currentWorldView.setCenter(player.getScreenPosition());
+    acceleratePlayer(0.f, 0.0106f);
     player.update();
+}
 
-    int startX = player.getScreenPosition().x/ScreenSettings::getBlockSize();
-    int startY = player.getScreenPosition().y/ScreenSettings::getBlockSize();
+void World::acceleratePlayer(float x, float y)
+{
+    player.velocity += Vector2f(x,y);
+}
 
-    for(int i = startX - 16; i < startX + 16; i++)
-    for(int j = startY - 9; j < startY + 9; j++)
+void World::jump()
+{
+    if(!player.jumping)
     {
-        if(player.getRect().intersects(blocks[i][j].getRect(i,j)))
-            player.velocity = Vector2f(0.f,0.f);
-        else
-            player.velocity += Vector2f(0.f,-0.3f);
+        acceleratePlayer(0.f, -0.195f);
+        player.jumping = true;
     }
 }
 
+bool World::isCollided(float x, float y, float sx, float sy)
+{
+    bool collide = false;
+    for(int i = 0; i < GameSettings::WORLD_SIZE_X; i++)
+    for(int j = 0; j < GameSettings::WORLD_SIZE_Y; j++)
+    {
+        //cout << player.getRect().left << "," << player.getRect().top << endl;
+        //cout << blocks[i][j].getRect(i,j).left << "," << blocks[i][j].getRect(i,j).top << endl;
+        //cout << blocks[i][j].flags << endl;
+        if(blocks[i][j].getRect(i,j).intersects(FloatRect(x,y,sx,sy)) && !(blocks[i][j].flags & BlockFlags::WORLD_BACK_LAYER))
+        {
+            collide = true;
+            break;
+        }
+    }
+    //Update the player!
+    return collide;
+}
 void World::setBlock(int _x, int _y, World::Block& block)
 {
     int x = max(0, min(_x, GameSettings::WORLD_SIZE_X));
@@ -105,8 +128,8 @@ void World::draw(RenderWindow& wnd)
     int startX = player.getScreenPosition().x/bsize;
     int startY = player.getScreenPosition().y/bsize;
 
-    for(int i = startX - 16; i < startX + 16; i++)
-    for(int j = startY - 9; j < startY + 9; j++)
+    for(float i = startX - 16; i < startX + 16; i++)
+    for(float j = startY - 9; j < startY + 9; j++)
     {
         World::Block block = getBlock(i,j);
         RectangleShape rs(Vector2f(bsize, bsize));
