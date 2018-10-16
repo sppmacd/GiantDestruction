@@ -20,15 +20,15 @@ Vector2f ScreenSettings::screenPosToB2(Vector2f vec)
 void ScreenRenderer::drawGUI()
 {
     //health bar
-    RectangleShape rsFilledHB(Vector2f(100.f, 20.f));
+    RectangleShape rsFilledHB(Vector2f(200.f, 20.f));
     rsFilledHB.setFillColor(Color(200,200,200));
     rsFilledHB.setOutlineColor(Color(50,50,50));
     rsFilledHB.setOutlineThickness(1.f);
     rsFilledHB.setPosition(Vector2f(10.f,10.f));
     ScreenSettings::window.draw(rsFilledHB);
 
-    RectangleShape rsHealthBar(Vector2f(player.health * 5.f / 6.f, 10.f));
-    int htc = player.health * 255/120;
+    RectangleShape rsHealthBar(Vector2f(GameSettings::world.getPlayer().health * 200.f / 120.f, 20.f));
+    int htc = GameSettings::world.getPlayer().health * 255/120;
     rsHealthBar.setFillColor(Color(255-htc,htc,0));
     rsHealthBar.setPosition(Vector2f(10.f,10.f));
     ScreenSettings::window.draw(rsHealthBar);

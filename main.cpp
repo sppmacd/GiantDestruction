@@ -24,6 +24,7 @@ int main()
     ScreenSettings::window.create(sf::VideoMode(ScreenSettings::X_BY_Y*800, 800), "Giant Destruction", Style::Default ^ Style::Resize);
     ScreenSettings::window.setView(ScreenSettings::currentWorldView);
     ScreenSettings::window.setVerticalSyncEnabled(true);
+
     ScreenSettings::currentWorldView = ScreenSettings::window.getDefaultView();
     ScreenSettings::currentGUIView = ScreenSettings::window.getDefaultView();
     ScreenSettings::loadTextures();
@@ -31,6 +32,8 @@ int main()
 
     while (ScreenSettings::window.isOpen())
     {
+        ScreenSettings::window.setView(ScreenSettings::currentWorldView);
+
         Event event;
         while (ScreenSettings::window.pollEvent(event))
         {
@@ -43,12 +46,13 @@ int main()
             }
         }
 
-        if(Keyboard::isKeyPressed(Keyboard::D)) GameSettings::world.movePlayer(0.2f, 0.f);
-        if(Keyboard::isKeyPressed(Keyboard::A)) GameSettings::world.movePlayer(-0.2f, 0.f);
         if(Keyboard::isKeyPressed(Keyboard::W)) GameSettings::world.jump();
+
+        if(Keyboard::isKeyPressed(Keyboard::D)) GameSettings::world.movePlayer(0.2f, 0.f, false);
+        if(Keyboard::isKeyPressed(Keyboard::A)) GameSettings::world.movePlayer(-0.2f, 0.f, false);
         // shovel - right button
         // kopary
-        if(Keyboard::isKeyPressed(Keyboard::S)) GameSettings::world.movePlayer(0.f, 0.2f);
+        if(Keyboard::isKeyPressed(Keyboard::S)) GameSettings::world.movePlayer(0.f, 0.2f, false);
 
         // UPDATE GAME LOGIC
         GameSettings::world.update();
@@ -58,7 +62,6 @@ int main()
 
         ScreenSettings::windowSize = Vector2u(ScreenSettings::X_BY_Y*800, 800);
 
-        ScreenSettings::window.setView(ScreenSettings::currentWorldView);
         ScreenRenderer::drawWorld();
         ScreenSettings::window.setView(ScreenSettings::currentGUIView);
         ScreenRenderer::drawGUI();

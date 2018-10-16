@@ -77,11 +77,7 @@ void World::acceleratePlayer(float x, float y)
 
 void World::jump()
 {
-    if(!player.jumping)
-    {
-        acceleratePlayer(0.f, -0.195f);
-        player.jumping = true;
-    }
+    player.jump();
 }
 
 bool World::isCollided(float x, float y, float sx, float sy)
@@ -132,7 +128,8 @@ void World::placeBlock(int x, int y)
        GameSettings::world.getBlock(x+1, y+1).blockType != 0 ||
        GameSettings::world.getBlock(x-1, y+1).blockType != 0 ||
        GameSettings::world.getBlock(x+1, y-1).blockType != 0 ||
-       GameSettings::world.getBlock(x-1, y-1).blockType != 0)
+       GameSettings::world.getBlock(x-1, y-1).blockType != 0 ||
+       GameSettings::world.getBlock(x, y).blockType != 0)
         && !GameSettings::world.isCollidedWithPlayer(x, y)
        )
     {
@@ -197,7 +194,7 @@ bool World::Block::hasFlag(int flag)
     return flags & flag;
 }
 
-void World::getPlayer()
+Player& World::getPlayer()
 {
     return player;
 }
