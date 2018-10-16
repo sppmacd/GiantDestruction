@@ -45,6 +45,10 @@ World::World()
             {
                 b.blockType = 3; //Grass
             }
+            else if(j < hh+3)
+            {
+                b.blockType = 2; // Dirt;
+            }
             else
             {
                 b.blockType = 1; //Stone
@@ -61,6 +65,9 @@ void World::update()
     ScreenSettings::currentWorldView.setCenter(player.getScreenPosition());
     acceleratePlayer(0.f, 0.0106f);
     player.update();
+
+    if(player.getPosition().y > 40.f)
+        respawnPlayer(5.f, 0.f);
 }
 
 void World::acceleratePlayer(float x, float y)
@@ -106,9 +113,44 @@ void World::setBlock(int _x, int _y, World::Block& block)
     blocks[x][y].meta = block.meta;
 }
 
+bool World::isCollidedWithPlayer(int x, int y)
+{
+    return player.getRect().intersects(blocks[x][y].getRect(x,y));
+}
+
 void World::movePlayer(float x, float y)
 {
     player.move(x,y);
+}
+
+void World::placeBlock(int x, int y)
+{
+    if((GameSettings::world.getBlock(x+1, y).blockType != 0 ||
+       GameSettings::world.getBlock(x-1, y).blockType != 0 ||
+       GameSettings::world.getBlock(x, y+1).blockType != 0 ||
+       GameSettings::world.getBlock(x, y-1).blockType != 0 ||
+       GameSettings::world.getBlock(x+1, y+1).blockType != 0 ||
+       GameSettings::world.getBlock(x-1, y+1).blockType != 0 ||
+       GameSettings::world.getBlock(x+1, y-1).blockType != 0 ||
+       GameSettings::world.getBlock(x-1, y-1).blockType != 0)
+        && !GameSettings::world.isCollidedWithPlayer(x, y)
+       )
+    {
+        World::Block block;
+
+        if(GameSettings::world.getBlock(x, y).blockType == 0)
+        {
+            block.blockType = 1;
+            block.flags = 0;
+        }
+        else
+        {
+            block.blockType = 0;
+            block.flags |= BlockFlags::WORLD_BACK_LAYER;
+        }
+
+        GameSettings::world.setBlock(x, y, block);
+    }
 }
 
 World::Block World::getBlock(int _x, int _y)
@@ -122,30 +164,25 @@ World::Block World::getBlock(int _x, int _y)
         return blocks[x][y];
 }
 
+float ScreenSettings::zoom;
+
+void World::respawnPlayer(float x, float y)
+{
+    player.respawn();
+    player.setPosition(x,y);
+}
+
 void World::draw(RenderWindow& wnd)
 {
     float bsize = ScreenSettings::getBlockSize();
     int startX = player.getScreenPosition().x/bsize;
     int startY = player.getScreenPosition().y/bsize;
 
-    for(float i = startX - 16; i < startX + 16; i++)
-    for(float j = startY - 9; j < startY + 9; j++)
+    for(float i = startX - 24*ScreenSettings::zoom; i < startX + 24*ScreenSettings::zoom; i++)
+    for(float j = startY - 14*ScreenSettings::zoom; j < startY + 14*ScreenSettings::zoom; j++)
     {
         World::Block block = getBlock(i,j);
-        RectangleShape rs(Vector2f(bsize, bsize));
-
-        int alpha = block.hasFlag(BlockFlags::WORLD_BACK_LAYER) ? 100 : 255;
-
-        switch(block.blockType)
-        {
-            case 0: rs.setFillColor(Color(0,0,0,alpha)); break;
-            case 1: rs.setFillColor(Color(128,128,128,alpha)); break;
-            case 3: rs.setFillColor(Color(0,128,0,alpha)); break;
-            default: rs.setFillColor(Color(255,255,255,alpha)); break;
-        }
-
-        rs.setPosition(ScreenSettings::b2PosToScreen(Vector2f(i,j)));
-        wnd.draw(rs);
+        ScreenRenderer::drawBlock(wnd, block, i, j);
     }
 
     //player

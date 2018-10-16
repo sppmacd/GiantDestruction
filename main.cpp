@@ -21,10 +21,12 @@ World world;
 
 int main()
 {
-    ScreenSettings::window.create(sf::VideoMode(ScreenSettings::X_BY_Y*500, 500), "Giant Destruction", Style::Default ^ Style::Resize);
+    ScreenSettings::window.create(sf::VideoMode(ScreenSettings::X_BY_Y*800, 800), "Giant Destruction", Style::Default ^ Style::Resize);
     ScreenSettings::window.setView(ScreenSettings::currentWorldView);
     ScreenSettings::window.setVerticalSyncEnabled(true);
     ScreenSettings::currentWorldView = ScreenSettings::window.getDefaultView();
+    ScreenSettings::loadTextures();
+    ScreenSettings::zoom = 1.f;
 
     while (ScreenSettings::window.isOpen())
     {
@@ -33,19 +35,26 @@ int main()
         {
             if (event.type == Event::Closed)
                 ScreenSettings::window.close();
+            if (event.type == Event::MouseButtonPressed)
+            {
+                Vector2f pos = ScreenSettings::screenPosToB2(ScreenSettings::window.mapPixelToCoords(Vector2i(event.mouseButton.x, event.mouseButton.y)));
+                GameSettings::world.placeBlock(pos.x, pos.y);
+            }
         }
 
-        if(Keyboard::isKeyPressed(Keyboard::Right)) GameSettings::world.movePlayer(0.2f, 0.f);
-        if(Keyboard::isKeyPressed(Keyboard::Left)) GameSettings::world.movePlayer(-0.2f, 0.f);
-        if(Keyboard::isKeyPressed(Keyboard::Up)) GameSettings::world.jump();
-        if(Keyboard::isKeyPressed(Keyboard::Down)) GameSettings::world.movePlayer(0.f, 0.2f);
+        if(Keyboard::isKeyPressed(Keyboard::D)) GameSettings::world.movePlayer(0.2f, 0.f);
+        if(Keyboard::isKeyPressed(Keyboard::A)) GameSettings::world.movePlayer(-0.2f, 0.f);
+        if(Keyboard::isKeyPressed(Keyboard::W)) GameSettings::world.jump();
+        // shovel - right button
+        // kopary
+        if(Keyboard::isKeyPressed(Keyboard::S)) GameSettings::world.movePlayer(0.f, 0.2f);
 
         ScreenSettings::window.clear();
 
-        ScreenSettings::windowSize = Vector2u(ScreenSettings::X_BY_Y*500, 500);
+        ScreenSettings::windowSize = Vector2u(ScreenSettings::X_BY_Y*800, 800);
         GameSettings::world.update();
         ScreenSettings::window.setView(ScreenSettings::currentWorldView);
-        ScreenRenderer::drawWorld(); //draw the box2d world
+        ScreenRenderer::drawWorld();
 
         ScreenSettings::window.display();
     }

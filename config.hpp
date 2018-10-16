@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <map>
 using namespace std;
 
 #include <SFML/Graphics.hpp>

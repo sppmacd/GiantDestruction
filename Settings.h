@@ -9,9 +9,15 @@ extern const float X_BY_Y;
 extern Vector2u windowSize;
 extern View currentWorldView;
 extern RenderWindow window;
+extern map<string,Texture> textures;
+extern float zoom;
 
 Vector2f b2PosToScreen(Vector2f vec);
+Vector2f screenPosToB2(Vector2f vec);
 float getBlockSize();
+void loadTextures();
+void loadTexture(string name);
+Texture& getTexture(string name);
 }
 
 namespace GameSettings
@@ -24,4 +30,5 @@ extern const int WORLD_SIZE_Y;
 namespace ScreenRenderer
 {
 void drawWorld();
+void drawBlock(RenderWindow& wnd, World::Block block, int x, int y);
 }
