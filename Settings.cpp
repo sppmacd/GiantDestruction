@@ -1,6 +1,7 @@
 #include "Settings.h"
 
 map<string,Texture> ScreenSettings::textures;
+View ScreenSettings::currentGUIView;
 
 Vector2f ScreenSettings::b2PosToScreen(Vector2f vec)
 {
@@ -14,6 +15,25 @@ Vector2f ScreenSettings::screenPosToB2(Vector2f vec)
     float x = vec.x/ScreenSettings::getBlockSize();
     float y = vec.y/ScreenSettings::getBlockSize();
     return Vector2f(x,y);
+}
+
+void ScreenRenderer::drawGUI()
+{
+    //health bar
+    RectangleShape rsFilledHB(Vector2f(100.f, 20.f));
+    rsFilledHB.setFillColor(Color(200,200,200));
+    rsFilledHB.setOutlineColor(Color(50,50,50));
+    rsFilledHB.setOutlineThickness(1.f);
+    rsFilledHB.setPosition(Vector2f(10.f,10.f));
+    ScreenSettings::window.draw(rsFilledHB);
+
+    RectangleShape rsHealthBar(Vector2f(player.health * 5.f / 6.f, 10.f));
+    int htc = player.health * 255/120;
+    rsHealthBar.setFillColor(Color(255-htc,htc,0));
+    rsHealthBar.setPosition(Vector2f(10.f,10.f));
+    ScreenSettings::window.draw(rsHealthBar);
+
+    /////////////
 }
 
 float ScreenSettings::getBlockSize()
@@ -38,6 +58,7 @@ Texture& ScreenSettings::getTexture(string name)
 
 void ScreenRenderer::drawWorld()
 {
+    // Sky
     VertexArray varr(Quads, 4);
     varr[0].position = Vector2f(0.f, -600.f);
     varr[0].color = Color(0,0,0);
@@ -53,6 +74,7 @@ void ScreenRenderer::drawWorld()
 
     ScreenSettings::window.draw(varr);
 
+    // Blocks
     GameSettings::world.draw(ScreenSettings::window);
 }
 

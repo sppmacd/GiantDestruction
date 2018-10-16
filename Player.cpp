@@ -12,6 +12,8 @@ void Player::respawn()
     position = Vector2f(5.f, 0.f);
     jumping = false;
     health = 120.f;
+    airTime = 0;
+    velocity = Vector2f(0.f, 0.f);
 }
 
 Vector2f Player::getPosition()
@@ -24,14 +26,28 @@ void Player::setPosition(float x, float y)
     position = Vector2f(x,y);
 }
 
+void Player::damage(float amount)
+{
+    if(health - amount > 0.f)
+        health -= amount;
+    else
+        health = 0.f;
+}
+
 void Player::move(float x, float y)
 {
     if(!GameSettings::world.isCollided(getRect().left+x, getRect().top+y, getRect().width, getRect().height))
+    {
         position += Vector2f(x,y);
+        if(y > 0.f)
+            airTime++;
+    }
     else //Reset player stat on collide
     {
         velocity = Vector2f(0.f,0.f);
         jumping = false;
+        damage((airTime - 10) / 6);
+        airTime = 0;
     }
 }
 

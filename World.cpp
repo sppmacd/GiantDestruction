@@ -197,6 +197,11 @@ bool World::Block::hasFlag(int flag)
     return flags & flag;
 }
 
+void World::getPlayer()
+{
+    return player;
+}
+
 void World::Block::setFlag(int flag)
 {
     flags |= flag;

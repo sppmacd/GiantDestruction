@@ -25,6 +25,7 @@ int main()
     ScreenSettings::window.setView(ScreenSettings::currentWorldView);
     ScreenSettings::window.setVerticalSyncEnabled(true);
     ScreenSettings::currentWorldView = ScreenSettings::window.getDefaultView();
+    ScreenSettings::currentGUIView = ScreenSettings::window.getDefaultView();
     ScreenSettings::loadTextures();
     ScreenSettings::zoom = 1.f;
 
@@ -49,12 +50,18 @@ int main()
         // kopary
         if(Keyboard::isKeyPressed(Keyboard::S)) GameSettings::world.movePlayer(0.f, 0.2f);
 
+        // UPDATE GAME LOGIC
+        GameSettings::world.update();
+
+        // RENDER GAME
         ScreenSettings::window.clear();
 
         ScreenSettings::windowSize = Vector2u(ScreenSettings::X_BY_Y*800, 800);
-        GameSettings::world.update();
+
         ScreenSettings::window.setView(ScreenSettings::currentWorldView);
         ScreenRenderer::drawWorld();
+        ScreenSettings::window.setView(ScreenSettings::currentGUIView);
+        ScreenRenderer::drawGUI();
 
         ScreenSettings::window.display();
     }

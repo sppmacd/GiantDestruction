@@ -35,6 +35,7 @@ public:
     void movePlayer(float x, float y);
     void acceleratePlayer(float x, float y);
     void placeBlock(int x, int y);
+    Player& getPlayer();
     void jump();
     void respawnPlayer(float x, float y);
     void setBlock(int x, int y, Block& block);
