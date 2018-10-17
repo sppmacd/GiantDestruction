@@ -26,7 +26,11 @@ namespace GameSettings
 extern World world;
 extern const int WORLD_SIZE_X;
 extern const int WORLD_SIZE_Y;
+  
+void saveDefaultWorld();
 }
+
+extern const int DEFAULT_WORLD;
 
 namespace ScreenRenderer
 {

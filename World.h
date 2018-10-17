@@ -27,6 +27,7 @@ public:
         void setFlag(int flag);
         void unsetFlag(int flag);
         FloatRect getRect(int x, int y);
+        Block(short code);
     };
 
     bool isCollided(float x, float y, float sx, float sy);
@@ -37,6 +38,7 @@ public:
     void placeBlock(int x, int y);
     Player& getPlayer();
     void jump();
+    void loadFromFile();
     void respawnPlayer(float x, float y);
     void setBlock(int x, int y, Block& block);
     Block getBlock(int x, int y);
