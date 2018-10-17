@@ -2,6 +2,21 @@
 
 map<string,Texture> ScreenSettings::textures;
 
+const short DEFAULT_WORLD[9][9][9]=
+    {//FFFF TYPE,HEIGHT,META,FLAGS
+        {
+            {1,1,1,1,1,1,0x3300,0x2300,0x1300},
+            {1,1 1,1,1,1,0x3600,0x2300,0x1300},
+            {1,1,1,1,1,1,0x3700,0x3330,0x2300},
+            {1,1,1,1,0x9300,0x8c00,0x8c00,0x3300,0x2300},
+            {1,1,1,1,1,1,1,0x3600,0x2300},
+            {1,1,1,1,1,0x9300,0x8c00,0x3700,0x3330},
+            {1,1,1,1,1,0x9300,0x8c00,0x8c00,0x3300},
+            {1,1,1,1,1,1,1,0x3400,0x3320},
+            {1,1,1,1,1,0x9300,0x8c00,0x3500,0x2300}
+        }
+    }
+
 Vector2f ScreenSettings::b2PosToScreen(Vector2f vec)
 {
     float x = ScreenSettings::getBlockSize()*vec.x;
