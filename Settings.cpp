@@ -16,7 +16,26 @@ const short DEFAULT_WORLD[9][9][9]=
             {1,1,1,1,1,0x9300,0x8c00,0x3500,0x2300}
         }
     }
+void GameSettings::saveDefaultWorld()
+{
+    string str = "MSD";
+    for(int i=0; i<9; i++)
+    {//chunk
+        str="MSD\255";
+        for(int j=0; j<9; j++)
+        {//vert.layer
+            str+=0xFE;
+            for(int k=0; k<9; k++)
+            {//block
+                str+=DEFAULT_WORLD[i][j][k];
+            }
 
+        }
+        ofstream fl("res/world/w"+to_string(i));
+        fl<<str;
+        f1.close();
+    }
+}
 Vector2f ScreenSettings::b2PosToScreen(Vector2f vec)
 {
     float x = ScreenSettings::getBlockSize()*vec.x;
