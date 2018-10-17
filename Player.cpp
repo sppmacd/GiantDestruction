@@ -39,6 +39,7 @@ void Player::move(float x, float y, bool disableVelocityResetting)
 {
     if(disableVelocityResetting)
         disableVelReset = true;
+
     if(!GameSettings::world.isCollided(getRect().left+x, getRect().top+y, getRect().width, getRect().height))
     {
         position += Vector2f(x,y);
@@ -47,18 +48,8 @@ void Player::move(float x, float y, bool disableVelocityResetting)
     }
     else //Reset player stat on collide
     {
-        if(!disableVelReset)
-        {
-            velocity = Vector2f(0.f,0.f);
-        }
-        else
-        {
-            disableVelReset = false;
-        }
-
         if(!damagedOnFall)
         {
-            velocity = Vector2f(0.f,0.f);
             if(y > 0.f)
             {
                 jumping = false;
@@ -92,7 +83,7 @@ void Player::update()
     if(health <= 0.f)
         respawn();
 
-    if(GameSettings::world.isCollided(getRect().left, getRect().top - 1.f, getRect().width, getRect().height))
+    if(GameSettings::world.isCollided(getRect().left, getRect().top + 0.1f, getRect().width, getRect().height) && !jumping)
         velocity = Vector2f(0.f,0.f);
 }
 

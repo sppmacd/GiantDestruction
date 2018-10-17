@@ -114,9 +114,9 @@ bool World::isCollidedWithPlayer(int x, int y)
     return player.getRect().intersects(blocks[x][y].getRect(x,y));
 }
 
-void World::movePlayer(float x, float y)
+void World::movePlayer(float x, float y, bool disableReset)
 {
-    player.move(x,y);
+    player.move(x,y,disableReset);
 }
 
 void World::placeBlock(int x, int y)

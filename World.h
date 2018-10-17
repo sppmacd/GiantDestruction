@@ -32,7 +32,7 @@ public:
     bool isCollided(float x, float y, float sx, float sy);
     bool isCollidedWithPlayer(int x, int y);
     void update();
-    void movePlayer(float x, float y);
+    void movePlayer(float x, float y, bool disableReset = false);
     void acceleratePlayer(float x, float y);
     void placeBlock(int x, int y);
     Player& getPlayer();

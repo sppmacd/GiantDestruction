@@ -46,13 +46,13 @@ int main()
             }
         }
 
-        if(Keyboard::isKeyPressed(Keyboard::W)) GameSettings::world.jump();
+        if(Keyboard::isKeyPressed(Keyboard::D)) GameSettings::world.movePlayer(0.2f, 0.f, true);
+        if(Keyboard::isKeyPressed(Keyboard::A)) GameSettings::world.movePlayer(-0.2f, 0.f, true);
 
-        if(Keyboard::isKeyPressed(Keyboard::D)) GameSettings::world.movePlayer(0.2f, 0.f, false);
-        if(Keyboard::isKeyPressed(Keyboard::A)) GameSettings::world.movePlayer(-0.2f, 0.f, false);
+        if(Keyboard::isKeyPressed(Keyboard::W)) GameSettings::world.jump();
         // shovel - right button
         // kopary
-        if(Keyboard::isKeyPressed(Keyboard::S)) GameSettings::world.movePlayer(0.f, 0.2f, false);
+        if(Keyboard::isKeyPressed(Keyboard::S)) GameSettings::world.movePlayer(0.f, 0.2f, true);
 
         // UPDATE GAME LOGIC
         GameSettings::world.update();
