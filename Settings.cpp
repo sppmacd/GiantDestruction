@@ -3,39 +3,50 @@
 map<string,Texture> ScreenSettings::textures;
 View ScreenSettings::currentGUIView;
 
-const short DEFAULT_WORLD[9][9][9]=
+const unsigned short DEFAULT_WORLD[][9][18]=
     {//FFFF TYPE,HEIGHT,META,FLAGS
         {
-            {1,1,1,1,1,1,0x3300,0x2300,0x1300},
-            {1,1 1,1,1,1,0x3600,0x2300,0x1300},
-            {1,1,1,1,1,1,0x3700,0x3330,0x2300},
-            {1,1,1,1,0x9300,0x8c00,0x8c00,0x3300,0x2300},
-            {1,1,1,1,1,1,1,0x3600,0x2300},
-            {1,1,1,1,1,0x9300,0x8c00,0x3700,0x3330},
-            {1,1,1,1,1,0x9300,0x8c00,0x8c00,0x3300},
-            {1,1,1,1,1,1,1,0x3400,0x3320},
-            {1,1,1,1,1,0x9300,0x8c00,0x3500,0x2300}
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0x3300,0x2300,0x1300},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0x3600,0x2300,0x1300},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0x3700,0x3330,0x2300},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,0x9301,0x8c01,0x8c01,0x3300,0x2300},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0x3600,0x2300},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0x9301,0x8c01,0x3700,0x3330},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0x9301,0x8c01,0x8c01,0x3300},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0x3400,0x3320},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0x9301,0x8c01,0x3500,0x2300}
+        },
+        {
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0x3300,0x2300},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0x3100,0x3300,0x2300},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,0x3900,0x3800,0x3300,0x2300,0x1300},
+            {1,1,1,1,1,1,1,1,1,0x4400,1,1,0x3100,0x3340,0x2300,0x1300,0x1300,0x1300},
+            {1,1,1,1,1,1,1,1,1,0x4500,0xa300,0xb300,0x3300,0x2300,0x1300,0x1300,0x1300,0x1300},
+            {1,1,1,1,1,1,1,1,1,0x4600,0xa300,0xb300,0x3300,0x2300,0x1300,0x1300,0x1300,0x1300},
+            {1,1,1,1,1,1,1,1,1,0x4700,1,1,0x3600,0x2300,0x1300,0x1300,0x1300,0x1300},
+            {1,1,1,1,1,1,1,1,1,1,1,1,0x3700,0x3330,0x2300,0x2300,0x1300,0x1300},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,0x3a00,0x3b00,0x3300,0x2300,0x1300}
         }
-    }
+    };
 void GameSettings::saveDefaultWorld()
 {
-    string str = "MSD";
-    for(int i=0; i<9; i++)
+    /*for(int i=0; i<2; i++)
     {//chunk
-        str="MSD\255";
+        ofstream file("res/world/chunk_"+to_string(i)+".chunk", ios::binary);
         for(int j=0; j<9; j++)
         {//vert.layer
-            str+=0xFE;
-            for(int k=0; k<9; k++)
+            for(int k=0; k<18; k++)
             {//block
-                str+=DEFAULT_WORLD[i][j][k];
+                string str;
+                cout << hex << "0x" << DEFAULT_WORLD[i][j][k] << ":";
+                str += (unsigned char)((DEFAULT_WORLD[i][j][k] & 0b1111111100000000) >> 8);
+                str += (unsigned char)(DEFAULT_WORLD[i][j][k] & 0b11111111);
+                file << (str);
             }
-
+            cout << endl;
         }
-        ofstream fl("res/world/w"+to_string(i));
-        fl<<str;
-        f1.close();
-    }
+        file.close();
+    }*/
 }
 Vector2f ScreenSettings::b2PosToScreen(Vector2f vec)
 {
@@ -125,6 +136,7 @@ void ScreenRenderer::drawBlock(RenderWindow& wnd, World::Block block, int x, int
         rs.setOutlineThickness(1.f);
     }
 
+    rs.setFillColor(Color(255,255,255,alpha));
     rs.setTexture(&ScreenSettings::getTexture("terrain"), false);
     rs.setTextureRect(IntRect(block.blockType*64,block.meta*64,64,64));
     rs.setPosition(ScreenSettings::b2PosToScreen(Vector2f(x,y)));

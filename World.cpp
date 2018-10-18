@@ -4,7 +4,7 @@
 
 namespace GameSettings
 {
-    const int WORLD_SIZE_X = 48;
+    const int WORLD_SIZE_X = 18;
     const int WORLD_SIZE_Y = 18;
 }
 
@@ -16,11 +16,76 @@ namespace BlockFlags
     const int WORLD_PHYSICAL = 0x8;
 }
 
+void World::loadFromFile(int chunkId)
+{
+    Chunk* chunk = new Chunk;
+
+    if(!chunks.count(chunkId))
+    {
+        ifstream file;
+
+        file.open("res/world/chunk_"+to_string(chunkId)+".chunk", ios::binary);
+        if(!file.good())
+        {
+            chunks.insert(make_pair(chunkId,chunk));
+            return;
+        }
+
+        int blockX = 0;
+        int blockY = 0;
+
+        cout << endl;
+
+        while(!file.eof())
+        {
+            char a,b;
+            file.read(&a,1);
+            file.read(&b,1);
+            int blockCode = a * 256 + b;
+
+            cout << blockX << hex << ":0x" << blockCode << ":";
+            Block block(blockCode);
+            chunk->setBlock(blockX, blockY, block);
+
+            blockY++;
+            if(blockY >= 18)
+            {
+                blockY = 0;
+                blockX++;
+            }
+        }
+    }
+    //addChunk(chunk,chunkId);
+    chunks.insert(make_pair(chunkId,chunk));
+}
+
+void World::addChunk(Chunk* chunk, int id)
+{
+    chunks.insert(make_pair(id,chunk));
+}
+
+World::Block::Block(unsigned short code)
+{
+    this->blockType = (code & 0b1111000000000000) >> 12;
+    this->heightType = (code & 0b111100000000) >> 8;
+    this->meta = (code & 0b11110000) >> 4;
+    this->flags = code & 0b1111;
+}
+
+World::~World()
+{
+    for(auto ch : chunks)
+    {
+        delete ch.second;
+    }
+}
 
 World::World()
 {
-    int hh = GameSettings::WORLD_SIZE_Y / 2;
-    for(int i = 0; i < GameSettings::WORLD_SIZE_X; i++)
+    //int hh = GameSettings::WORLD_SIZE_Y / 2;
+    GameSettings::saveDefaultWorld();
+    loadFromFile(0);
+    /*for(int i = 0; i < GameSettings::WORLD_SIZE_X; i++)
     {
         hh += rand() % 3 - 1;
 
@@ -57,7 +122,8 @@ World::World()
             setBlock(i,j,b);
             //cout << blocks[i][j].flags << endl;
         }
-    }
+    }*/
+
 }
 
 void World::update()
@@ -83,13 +149,15 @@ void World::jump()
 bool World::isCollided(float x, float y, float sx, float sy)
 {
     bool collide = false;
-    for(int i = 0; i < GameSettings::WORLD_SIZE_X; i++)
+    for(int i = int(x)-int(x)%9; i < int(x)-int(x)%9+9; i++)
     for(int j = 0; j < GameSettings::WORLD_SIZE_Y; j++)
     {
         //cout << player.getRect().left << "," << player.getRect().top << endl;
         //cout << blocks[i][j].getRect(i,j).left << "," << blocks[i][j].getRect(i,j).top << endl;
         //cout << blocks[i][j].flags << endl;
-        if(blocks[i][j].getRect(i,j).intersects(FloatRect(x,y,sx,sy)) && !(blocks[i][j].flags & BlockFlags::WORLD_BACK_LAYER))
+        Block b = getBlock(i,j);
+        bool t = b.getRect(i,j).intersects(FloatRect(x,y,sx,sy)) && !(b.flags & BlockFlags::WORLD_BACK_LAYER);
+        if(t)
         {
             collide = true;
             break;
@@ -100,18 +168,24 @@ bool World::isCollided(float x, float y, float sx, float sy)
 }
 void World::setBlock(int _x, int _y, World::Block& block)
 {
-    int x = max(0, min(_x, GameSettings::WORLD_SIZE_X));
-    int y = max(0, min(_y, GameSettings::WORLD_SIZE_Y));
+    if(_x < 0 || _y < 0)
+        return;
 
-    blocks[x][y].blockType = block.blockType;
-    blocks[x][y].flags = block.flags;
-    blocks[x][y].heightType = block.heightType;
-    blocks[x][y].meta = block.meta;
+    int x = _x;
+    int y = _y;
+
+    if(chunks.count(x/9))
+    {
+        Chunk* chunk = chunks[x/9];
+        chunk->setBlock(x%9,y,block);
+    }
+    else
+        loadFromFile(x/9);
 }
 
 bool World::isCollidedWithPlayer(int x, int y)
 {
-    return player.getRect().intersects(blocks[x][y].getRect(x,y));
+    return player.getRect().intersects(getBlock(x,y).getRect(x,y));
 }
 
 void World::movePlayer(float x, float y, bool disableReset)
@@ -133,7 +207,7 @@ void World::placeBlock(int x, int y)
         && !GameSettings::world.isCollidedWithPlayer(x, y)
        )
     {
-        World::Block block;
+        World::Block block(0);
 
         if(GameSettings::world.getBlock(x, y).blockType == 0)
         {
@@ -152,13 +226,24 @@ void World::placeBlock(int x, int y)
 
 World::Block World::getBlock(int _x, int _y)
 {
-    int x = max(-1, min(_x, GameSettings::WORLD_SIZE_X+1));
-    int y = max(-1, min(_y, GameSettings::WORLD_SIZE_Y+1));
+    if(_x < 0 || _y < 0)
+        return World::Block();
 
-    if(x == -1 || x == GameSettings::WORLD_SIZE_X+1 || y == -1 || y == GameSettings::WORLD_SIZE_Y+1)
-        return World::Block{0,0,0,0x1}; //air
+    int x = _x;
+    int y = _y;
+
+    if(chunks.count(x/9))
+    {
+        if(x == -1 || x == GameSettings::WORLD_SIZE_X+1 || y == -1 || y == GameSettings::WORLD_SIZE_Y+1)
+            return World::Block(); //air
+        else
+            return chunks[x/9]->getBlock(x%9,y);
+    }
     else
-        return blocks[x][y];
+    {
+        loadFromFile(x/9);
+        return World::Block();
+    }
 }
 
 float ScreenSettings::zoom;
@@ -175,11 +260,18 @@ void World::draw(RenderWindow& wnd)
     int startX = player.getScreenPosition().x/bsize;
     int startY = player.getScreenPosition().y/bsize;
 
-    for(float i = startX - 24*ScreenSettings::zoom; i < startX + 24*ScreenSettings::zoom; i++)
-    for(float j = startY - 14*ScreenSettings::zoom; j < startY + 14*ScreenSettings::zoom; j++)
+    float iend = startX + 24*ScreenSettings::zoom;
+
+    for(float i = startX - 24*ScreenSettings::zoom; i < iend; i++)
+    for(float j = 0; j < 18; j++)
     {
-        World::Block block = getBlock(i,j);
-        ScreenRenderer::drawBlock(wnd, block, i, j);
+        if(i >= 0 && j >= 0)
+        {
+            //cout << "startdraw " << i << "," << j << endl;
+            World::Block block = getBlock(i,j);
+            ScreenRenderer::drawBlock(wnd, block, i, j);
+            //cout << "enddraw " << i << "," << j << endl;
+        }
     }
 
     //player
@@ -212,4 +304,22 @@ void World::Block::unsetFlag(int flag)
 FloatRect World::Block::getRect(int x, int y)
 {
     return FloatRect(x,y,1,1);
+}
+
+
+Chunk::Chunk()
+{
+}
+
+void Chunk::setBlock(int x, int y, World::Block& block)
+{
+    if(x >=0 && x < 9 && y >= 0 && y < 18)
+        blocks[x][y] = block;
+}
+World::Block Chunk::getBlock(int x, int y)
+{
+    if(x >= 0 && x < 9 && y >= 0 && y < 18)
+        return blocks[x][y];
+    else
+        return World::Block();
 }

@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <fstream>
 using namespace std;
 
 #include <SFML/Graphics.hpp>

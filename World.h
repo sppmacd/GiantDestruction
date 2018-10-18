@@ -11,11 +11,14 @@ namespace BlockFlags
     extern const int WORLD_PHYSICAL;
 }
 
+class Chunk;
+
 class World
 {
     Player player;
 public:
     World();
+    virtual ~World();
     struct Block
     {
         int heightType : 4;
@@ -27,7 +30,8 @@ public:
         void setFlag(int flag);
         void unsetFlag(int flag);
         FloatRect getRect(int x, int y);
-        Block(short code);
+        Block(unsigned short code);
+        Block() : Block(0) {}
     };
 
     bool isCollided(float x, float y, float sx, float sy);
@@ -38,11 +42,21 @@ public:
     void placeBlock(int x, int y);
     Player& getPlayer();
     void jump();
-    void loadFromFile();
+    void loadFromFile(int chunkId);
     void respawnPlayer(float x, float y);
     void setBlock(int x, int y, Block& block);
     Block getBlock(int x, int y);
     void draw(RenderWindow& wnd);
+    void addChunk(Chunk* chunk, int id);
 private:
-    Block blocks[48][32];
+    map<int,Chunk*> chunks;
+};
+
+class Chunk
+{
+    World::Block blocks[9][18];
+public:
+    Chunk();
+    void setBlock(int x, int y, World::Block& block);
+    World::Block getBlock(int x, int y);
 };

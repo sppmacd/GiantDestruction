@@ -50,6 +50,8 @@ void Player::move(float x, float y, bool disableVelocityResetting)
     {
         if(!damagedOnFall)
         {
+            if(y != 0.f) velocity.y = 0.f;
+            if(x != 0.f) velocity.x = 0.f;
             if(y > 0.f)
             {
                 jumping = false;
