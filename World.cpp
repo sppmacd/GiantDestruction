@@ -41,11 +41,11 @@ void World::loadFromFile(int chunkId)
             char a,b;
             file.read(&a,1);
             file.read(&b,1);
-            int blockCode = a * 256 + b;
+            short blockCode = ((a << 8) + b) & 0xFFFF;
 
             cout << blockX << hex << ":0x" << blockCode << ":";
             Block block(blockCode);
-            chunk->setBlock(blockX, blockY, block);
+            chunk->setBlock(blockX, blockY, block); //nie dziala powyzej 8!
 
             blockY++;
             if(blockY >= 18)
@@ -66,10 +66,10 @@ void World::addChunk(Chunk* chunk, int id)
 
 World::Block::Block(unsigned short code)
 {
-    this->blockType = (code & 0b1111000000000000) >> 12;
-    this->heightType = (code & 0b111100000000) >> 8;
-    this->meta = (code & 0b11110000) >> 4;
-    this->flags = code & 0b1111;
+    this->blockType = (code & 0xF000) >> 12;
+    this->heightType = (code & 0xF00) >> 8;
+    this->meta = (code & 0xF0) >> 4;
+    this->flags = code & 0xF;
 }
 
 World::~World()
