@@ -41,7 +41,7 @@ void World::loadFromFile(int chunkId)
             char a,b;
             file.read(&a,1);
             file.read(&b,1);
-            short blockCode = ((a << 8) + b) & 0xFFFF;
+            short blockCode = ((a << 8) | b) & 0xFFFF;
 
             cout << blockX << hex << ":0x" << blockCode << ":";
             Block block(blockCode);
