@@ -12,6 +12,7 @@ extern View currentGUIView;
 extern RenderWindow window;
 extern map<string,Texture> textures;
 extern float zoom;
+extern Font font;
 
 Vector2f b2PosToScreen(Vector2f vec);
 Vector2f screenPosToB2(Vector2f vec);

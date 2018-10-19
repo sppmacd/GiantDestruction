@@ -55,6 +55,8 @@ Vector2f ScreenSettings::b2PosToScreen(Vector2f vec)
     return Vector2f(x,y);
 }
 
+Font ScreenSettings::font;
+
 Vector2f ScreenSettings::screenPosToB2(Vector2f vec)
 {
     float x = vec.x/ScreenSettings::getBlockSize();
@@ -78,7 +80,31 @@ void ScreenRenderer::drawGUI()
     rsHealthBar.setPosition(Vector2f(10.f,10.f));
     ScreenSettings::window.draw(rsHealthBar);
 
-    /////////////
+    ////////////////////////////
+    // block info and outline //
+    ////////////////////////////
+
+    Vector2f pos = ScreenSettings::screenPosToB2(ScreenSettings::window.mapPixelToCoords(Vector2i(Mouse::getPosition())));
+    Vector2f pos2 = ScreenSettings::b2PosToScreen(Vector2f(int(pos.x), int(pos.y)));
+    RectangleShape rs(Vector2f(ScreenSettings::getBlockSize(), ScreenSettings::getBlockSize()));
+    rs.setPosition(pos2);
+    ScreenSettings::window.draw(rs);
+
+    World::Block block = GameSettings::world.getBlock(pos2.x,pos2.y);
+    Text text(string("Giant Destruction v1.0 [beta] [build")+__TIME__+string("]")+
+              "Mx: "+to_string(Mouse::getPosition().x) + "\n"+
+              "My: "+to_string(Mouse::getPosition().y) + "\n"+
+              "Bx: "+to_string(pos.x) + "\n"+
+              "By: "+to_string(pos.y) + "\n"+
+              string("Bdata:")+
+                " T: "+to_string(block.blockType) +
+                " HT: "+to_string(block.heightType) +
+                " M: "+to_string(block.meta) +
+                " F: "+to_string(block.flags),
+              ScreenSettings::font,15
+              );
+    text.setPosition(10.f, 40.f);
+    ScreenSettings::window.draw(text);
 }
 
 float ScreenSettings::getBlockSize()
@@ -89,6 +115,7 @@ float ScreenSettings::getBlockSize()
 void ScreenSettings::loadTextures()
 {
     loadTexture("terrain");
+    ScreenSettings::font.loadFromFile("res/arial.ttf");
 }
 void ScreenSettings::loadTexture(string name)
 {
@@ -108,7 +135,7 @@ void ScreenRenderer::drawWorld()
     varr[0].position = Vector2f(0.f, -600.f);
     varr[0].color = Color(0,0,0);
 
-    varr[1].position = Vector2f(ScreenSettings::getBlockSize() * GameSettings::WORLD_SIZE_X, -600.f);
+    varr[1].position = Vector2f(ScreenSettings::getBlockSize() * GameSettings::WORLD_SIZE_X, -300.f);
     varr[1].color = Color(0,0,0);
 
     varr[2].position = Vector2f(ScreenSettings::getBlockSize() * GameSettings::WORLD_SIZE_X, ScreenSettings::getBlockSize() * GameSettings::WORLD_SIZE_Y);
@@ -129,12 +156,6 @@ void ScreenRenderer::drawBlock(RenderWindow& wnd, World::Block block, int x, int
     RectangleShape rs(Vector2f(bsize, bsize));
 
     int alpha = block.hasFlag(BlockFlags::WORLD_BACK_LAYER) ? 100 : 255;
-
-    if(FloatRect(ScreenSettings::b2PosToScreen(Vector2f(x,y)), Vector2f(bsize, bsize)).contains(wnd.mapPixelToCoords(Mouse::getPosition(wnd))))
-    {
-        rs.setOutlineColor(Color::Red);
-        rs.setOutlineThickness(1.f);
-    }
 
     rs.setFillColor(Color(255,255,255,alpha));
     rs.setTexture(&ScreenSettings::getTexture("terrain"), false);

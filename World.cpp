@@ -43,7 +43,7 @@ void World::loadFromFile(int chunkId)
             file.read(&b,1);
             short blockCode = ((a << 8) | b) & 0xFFFF;
 
-            cout << blockX << hex << ":0x" << blockCode << ":";
+            cout << "[" << blockX << "," << blockY << "]: 0x" << hex << blockCode << "; ";
             Block block(blockCode);
             chunk->setBlock(blockX, blockY, block); //nie dziala powyzej 8!
 
@@ -52,6 +52,7 @@ void World::loadFromFile(int chunkId)
             {
                 blockY = 0;
                 blockX++;
+                cout << endl;
             }
         }
     }
@@ -258,7 +259,7 @@ void World::draw(RenderWindow& wnd)
 {
     float bsize = ScreenSettings::getBlockSize();
     int startX = player.getScreenPosition().x/bsize;
-    int startY = player.getScreenPosition().y/bsize;
+    //int startY = player.getScreenPosition().y/bsize;
 
     float iend = startX + 24*ScreenSettings::zoom;
 
