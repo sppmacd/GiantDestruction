@@ -21,14 +21,14 @@ public:
     virtual ~World();
     struct Block
     {
-        int heightType : 4;
-        int blockType : 4;
-        int meta : 4;
-        int flags : 4;
+        unsigned heightType : 4;
+        unsigned blockType : 4;
+        unsigned meta : 4;
+        unsigned flags : 4;
 
-        bool hasFlag(int flag);
-        void setFlag(int flag);
-        void unsetFlag(int flag);
+        bool hasFlag(unsigned flag);
+        void setFlag(unsigned flag);
+        void unsetFlag(unsigned flag);
         FloatRect getRect(int x, int y);
         Block(unsigned short code);
         Block() : Block(0) {}

@@ -280,9 +280,22 @@ void World::draw(RenderWindow& wnd)
     rs.setFillColor(Color(100,0,0));
     rs.setPosition(player.getScreenPosition());
     wnd.draw(rs);
+
+    ////////////////////////////
+    // block info and outline //
+    ////////////////////////////
+
+    Vector2f pos = ScreenSettings::screenPosToB2(ScreenSettings::window.mapPixelToCoords(Mouse::getPosition(ScreenSettings::window)));
+
+    RectangleShape rs2(Vector2f(ScreenSettings::getBlockSize(), ScreenSettings::getBlockSize()));
+    rs2.setPosition(ScreenSettings::b2PosToScreen(Vector2f(int(pos.x),int(pos.y))));
+    rs2.setFillColor(Color::Transparent);
+    rs2.setOutlineColor(Color::Red);
+    rs2.setOutlineThickness(1.f);
+    ScreenSettings::window.draw(rs2);
 }
 
-bool World::Block::hasFlag(int flag)
+bool World::Block::hasFlag(unsigned flag)
 {
     return flags & flag;
 }
@@ -292,12 +305,12 @@ Player& World::getPlayer()
     return player;
 }
 
-void World::Block::setFlag(int flag)
+void World::Block::setFlag(unsigned flag)
 {
     flags |= flag;
 }
 
-void World::Block::unsetFlag(int flag)
+void World::Block::unsetFlag(unsigned flag)
 {
     flags ^= flag;
 }

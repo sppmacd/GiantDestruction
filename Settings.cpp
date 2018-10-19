@@ -80,29 +80,25 @@ void ScreenRenderer::drawGUI()
     rsHealthBar.setPosition(Vector2f(10.f,10.f));
     ScreenSettings::window.draw(rsHealthBar);
 
-    ////////////////////////////
-    // block info and outline //
-    ////////////////////////////
+    //debug info
 
-    Vector2f pos = ScreenSettings::screenPosToB2(ScreenSettings::window.mapPixelToCoords(Vector2i(Mouse::getPosition())));
-    Vector2f pos2 = ScreenSettings::b2PosToScreen(Vector2f(int(pos.x), int(pos.y)));
-    RectangleShape rs(Vector2f(ScreenSettings::getBlockSize(), ScreenSettings::getBlockSize()));
-    rs.setPosition(pos2);
-    ScreenSettings::window.draw(rs);
+    ScreenSettings::window.setView(ScreenSettings::currentWorldView);
+    Vector2f pos = ScreenSettings::screenPosToB2(ScreenSettings::window.mapPixelToCoords(Mouse::getPosition(ScreenSettings::window)));
+    ScreenSettings::window.setView(ScreenSettings::currentGUIView);
 
-    World::Block block = GameSettings::world.getBlock(pos2.x,pos2.y);
-    Text text(string("Giant Destruction v1.0 [beta] [build")+__TIME__+string("]")+
-              "Mx: "+to_string(Mouse::getPosition().x) + "\n"+
-              "My: "+to_string(Mouse::getPosition().y) + "\n"+
-              "Bx: "+to_string(pos.x) + "\n"+
-              "By: "+to_string(pos.y) + "\n"+
-              string("Bdata:")+
-                " T: "+to_string(block.blockType) +
-                " HT: "+to_string(block.heightType) +
-                " M: "+to_string(block.meta) +
-                " F: "+to_string(block.flags),
-              ScreenSettings::font,15
-              );
+    World::Block block = GameSettings::world.getBlock(pos.x,pos.y);
+    Text text(string("Giant Destruction v1.0 [beta] [build ")+string(__DATE__)+" "+string(__TIME__)+string("]\n")+
+          "Mx: "+to_string(Mouse::getPosition().x) + "\n"+
+          "My: "+to_string(Mouse::getPosition().y) + "\n"+
+          "Bx: "+to_string(int(pos.x)) + "\n"+
+          "By: "+to_string(int(pos.y)) + "\n"+
+          string("Bdata:")+
+            " T: "+to_string(block.blockType) +
+            " HT: "+to_string(block.heightType) +
+            " M: "+to_string(block.meta) +
+            " F: "+to_string(block.flags),
+          ScreenSettings::font,15
+          );
     text.setPosition(10.f, 40.f);
     ScreenSettings::window.draw(text);
 }
