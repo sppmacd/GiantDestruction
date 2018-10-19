@@ -31,7 +31,7 @@ extern const int WORLD_SIZE_Y;
 void saveDefaultWorld();
 }
 
-extern const unsigned short DEFAULT_WORLD[][9][18];
+//extern const unsigned short DEFAULT_WORLD[][9][18];
 
 namespace ScreenRenderer
 {

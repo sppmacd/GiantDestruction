@@ -38,12 +38,12 @@ void World::loadFromFile(int chunkId)
 
         while(!file.eof())
         {
-            char a,b;
-            file.read(&a,1);
-            file.read(&b,1);
-            short blockCode = ((a << 8) | b) & 0xFFFF;
+            unsigned char a,b;
+            file.read((char*)&a,1);
+            file.read((char*)&b,1);
+            unsigned short blockCode = ((a << 8) | b) & 0xFFFF;
 
-            cout << "[" << blockX << "," << blockY << "]: 0x" << hex << blockCode << "; ";
+            cout << "[" << blockX << "," << blockY << "]: A:" << int(a) << " B:" << int(b) << " C: 0x" << hex << blockCode << "; ";
             Block block(blockCode);
             chunk->setBlock(blockX, blockY, block); //nie dziala powyzej 8!
 
@@ -212,8 +212,9 @@ void World::placeBlock(int x, int y)
 
         if(GameSettings::world.getBlock(x, y).blockType == 0)
         {
-            block.blockType = 1;
+            block.blockType = 5;
             block.flags = 0;
+            block.heightType = 3;
         }
         else
         {

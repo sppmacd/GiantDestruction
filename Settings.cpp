@@ -3,7 +3,7 @@
 map<string,Texture> ScreenSettings::textures;
 View ScreenSettings::currentGUIView;
 
-const unsigned short DEFAULT_WORLD[][9][18]=
+/*const unsigned short DEFAULT_WORLD[][9][18]=
     {//FFFF TYPE,HEIGHT,META,FLAGS
         {
             {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0x3300,0x2300,0x1300},
@@ -27,7 +27,28 @@ const unsigned short DEFAULT_WORLD[][9][18]=
             {1,1,1,1,1,1,1,1,1,1,1,1,0x3700,0x3330,0x2300,0x2300,0x1300,0x1300},
             {1,1,1,1,1,1,1,1,1,1,1,1,1,0x3a00,0x3b00,0x3300,0x2300,0x1300}
         }
-    };
+    };*/
+
+const int blockHTV[][4][4] =
+{
+    {{0,29,0,0},{0,32,0,64},{32,32,64,64},{32,29,64,0}}, //PLATE    0
+    {{0,32,0,0},{32,32,0,64},{32,32,64,64},{32,0,64,0}}, //45U       1
+    {{0,0,0,0},{0,32,0,64},{0,32,64,64},{32,32,64,0}}, //45D        2
+    {{0,0,0,0},{0,32,0,64},{32,32,64,64},{32,0,64,0}}, //FULL       3
+    {{0,32,0,0},{32,32,0,64},{32,32,64,64},{32,16,64,0}}, //225UD   4
+    {{0,16,0,0},{0,32,0,64},{32,32,64,64},{32,0,64,0}}, //225UU     5
+    {{0,0,0,0},{0,32,0,64},{32,32,64,64},{32,16,64,0}}, //225DU     6
+    {{0,16,0,0},{0,32,0,64},{0,32,64,64},{32,32,64,0}}, //225DD     7
+    {{0,32,0,0},{32,32,0,64},{32,0,64,64},{16,0,64,0}}, //675UD     8 v
+    {{16,32,0,0},{32,32,0,64},{32,32,64,64},{32,0,64,0}}, //675UU   9
+    {{0,0,0,0},{0,32,0,64},{0,32,64,64},{16,32,64,0}}, //675DU      a
+    {{16,0,0,0},{0,0,0,64},{0,32,64,64},{32,32,64,0}}, //675DD      b v
+    {{8,0,0,0},{24,0,0,64},{24,32,64,64},{24,0,64,0}}, //VPLIIAR    c v
+    {{0,8,0,0},{0,24,0,64},{32,24,64,64},{32,8,64,0}}, //HPILLAR    d
+    {{8,8,0,0},{8,24,0,64},{24,24,64,64},{24,8,64,0}}, //CPILLAR    e
+    {{0,0,0,0},{0,0,0,64},{0,0,64,64},{0,0,64,0}} //STRUCTURE f
+};
+
 void GameSettings::saveDefaultWorld()
 {
     /*for(int i=0; i<2; i++)
@@ -148,14 +169,22 @@ void ScreenRenderer::drawWorld()
 
 void ScreenRenderer::drawBlock(RenderWindow& wnd, World::Block block, int x, int y)
 {
-    float bsize = ScreenSettings::getBlockSize();
-    RectangleShape rs(Vector2f(bsize, bsize));
-
+    //float bsize = ScreenSettings::getBlockSize();
+    Vector2f bpos = ScreenSettings::b2PosToScreen(Vector2f(x,y));
+    //int arr[4][4] = ;
     int alpha = block.hasFlag(BlockFlags::WORLD_BACK_LAYER) ? 100 : 255;
+    auto arr = blockHTV[block.heightType];
 
-    rs.setFillColor(Color(255,255,255,alpha));
-    rs.setTexture(&ScreenSettings::getTexture("terrain"), false);
-    rs.setTextureRect(IntRect(block.blockType*64,block.meta*64,64,64));
-    rs.setPosition(ScreenSettings::b2PosToScreen(Vector2f(x,y)));
-    wnd.draw(rs);
+    VertexArray varr(Quads, 4);
+
+    varr.append(sf::Vertex(Vector2f(arr[0][0]+bpos.x,arr[0][1]+bpos.y), Color(255,255,255,alpha),
+                           Vector2f(arr[0][2]+block.blockType*64,arr[0][3]+block.meta*64)));
+    varr.append(sf::Vertex(Vector2f(arr[1][0]+bpos.x,arr[1][1]+bpos.y), Color(255,255,255,alpha),
+                           Vector2f(arr[1][2]+block.blockType*64,arr[1][3]+block.meta*64)));
+    varr.append(sf::Vertex(Vector2f(arr[2][0]+bpos.x,arr[2][1]+bpos.y), Color(255,255,255,alpha),
+                           Vector2f(arr[2][2]+block.blockType*64,arr[2][3]+block.meta*64)));
+    varr.append(sf::Vertex(Vector2f(arr[3][0]+bpos.x,arr[3][1]+bpos.y), Color(255,255,255,alpha),
+                           Vector2f(arr[3][2]+block.blockType*64,arr[3][3]+block.meta*64)));
+
+    wnd.draw(varr, &ScreenSettings::getTexture("terrain"));
 }
