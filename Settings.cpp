@@ -126,9 +126,17 @@ void ScreenRenderer::drawGUI()
     text.setPosition(10.f, 60.f);
     ScreenSettings::window.draw(text);
 
-    RectangleShape rsb(Vector2f(425.f, 50.f));
-    rsb.setPosition(335.f, 5.f);
+    RectangleShape rsb(Vector2f(415.f, 55.f));
+    rsb.setPosition(337.5f, 2.5f);
     ScreenSettings::window.draw(rsb);
+
+    RectangleShape rsItemBg(Vector2f(45.f, 45.f)); //bg
+    rsItemBg.setPosition(345.f + GameSettings::world.getPlayer().currentBlock * 45.f,10.f);
+    rsItemBg.setOrigin(2.5f, 2.5f);
+    rsItemBg.setFillColor(Color::Transparent);
+    rsItemBg.setOutlineColor(Color(200,50,50));
+    rsItemBg.setOutlineThickness(2.f);
+    ScreenSettings::window.draw(rsItemBg);
 
     for(unsigned int i = 0; i < 10; i++)
     {
@@ -136,8 +144,8 @@ void ScreenRenderer::drawGUI()
 
         // equipped block
         Sprite sprite;
-        sprite.setTexture(ScreenSettings::getTexture("terrain"));
-        sprite.setTextureRect(IntRect(player->inventory.getItem(i,0).id*64,64*15,64,64));
+        sprite.setTexture(ScreenSettings::getTexture("items"));
+        sprite.setTextureRect(IntRect(player->inventory.getItem(i,0).id*64,0,64,64));
         sprite.setScale(0.6f, 0.6f);
         if(i != GameSettings::world.getPlayer().currentBlock)
             sprite.setColor(Color(255,255,255,200));
@@ -171,9 +179,9 @@ void ScreenRenderer::drawInventory()
             if(j == 0) //hotbar
             {
                 if(player->inventory.getSlotByPos(mousePos.x, mousePos.y) != Vector2i(i,j))
-                    rs.setFillColor(Color(255,64,64));
-                else
                     rs.setFillColor(Color(128,64,64));
+                else
+                    rs.setFillColor(Color(255,64,64));
             }
 
             rs2.setPosition(player->inventory.getSlotPos(i,j));
