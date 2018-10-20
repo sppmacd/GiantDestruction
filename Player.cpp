@@ -16,6 +16,15 @@ void Player::respawn()
     velocity = Vector2f(0.f, 0.f);
     damagedOnFall = false;
     currentBlock = 1;
+
+    inventory.clear();
+
+    for(int i = 1; i < 16; i++)
+    {
+        Item item;
+        item.id = i;
+        inventory.setItem((i-1) % 9, (i-1) / 9, item);
+    }
 }
 
 Vector2f Player::getPosition()
@@ -72,6 +81,15 @@ void Player::move(float x, float y, bool disableVelocityResetting)
 FloatRect Player::getRect()
 {
     return FloatRect(position.x-0.4f, position.y-2.9f, 0.8f, 2.9f);
+}
+
+void Player::inventoryOnClick(Vector2i mousePos)
+{
+    Vector2i slot = inventory.getSlotByPos(mousePos.x, mousePos.y);
+    if(GameSettings::currentPickedItem.id == 0 && inventory.getItem(slot.x, slot.y).id != 0)
+        inventory.onPick(slot.x, slot.y);
+    else
+        inventory.onPut(slot.x, slot.y);
 }
 
 void Player::jump()

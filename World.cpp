@@ -177,7 +177,7 @@ void World::placeBlock(int x, int y)
 
         if(block2.blockType == 0 && !isCollidedWithPlayer(x, y))
         {
-            block.blockType = player.currentBlock;
+            block.blockType = player.inventory.getItem(player.currentBlock,0).id;
             block.flags = 0;
             block.heightType = BlockHeightType::HT_FULL_BlOCK;
             block.meta = BlockMetadata::META_DEFAULT;

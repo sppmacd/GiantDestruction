@@ -1,6 +1,5 @@
 #include "config.hpp"
 
-#include "Player.h"
 #include "World.h"
 #include "Settings.h"
 
@@ -11,6 +10,7 @@ namespace ScreenSettings
 const float X_BY_Y = 16.f/9.f;
 Vector2u windowSize;
 View currentWorldView;
+View currentInventoryView;
 RenderWindow window;
 }
 
@@ -18,6 +18,8 @@ namespace GameSettings
 {
 World world;
 bool loaded = false;
+Item currentPickedItem = 0;
+bool inventoryOpened = false;
 }
 
 int main()
@@ -30,7 +32,9 @@ int main()
 
     ScreenSettings::currentWorldView = ScreenSettings::window.getDefaultView();
     ScreenSettings::currentGUIView = ScreenSettings::window.getDefaultView();
+    ScreenSettings::currentInventoryView = ScreenSettings::window.getDefaultView();
     ScreenSettings::loadTextures();
+
     GameSettings::world.init();
     GameSettings::loaded = true;
 
@@ -43,15 +47,26 @@ int main()
         {
             if (event.type == Event::Closed)
                 ScreenSettings::window.close();
-            if (event.type == Event::MouseButtonPressed)
+            if (event.type == Event::MouseButtonPressed)            // item drag and drop.
             {
-                Vector2f pos = ScreenSettings::screenPosToB2(ScreenSettings::window.mapPixelToCoords(Vector2i(event.mouseButton.x, event.mouseButton.y)));
-                GameSettings::world.placeBlock(pos.x, pos.y);
+                if(!GameSettings::inventoryOpened)
+                {
+                    Vector2f pos = ScreenSettings::screenPosToB2(ScreenSettings::window.mapPixelToCoords(Vector2i(event.mouseButton.x, event.mouseButton.y)));
+                    GameSettings::world.placeBlock(pos.x, pos.y);
+                }
+                else
+                {
+                    GameSettings::world.getPlayer().inventoryOnClick(Vector2i(event.mouseButton.x, event.mouseButton.y));
+                }
             }
             if (event.type == Event::KeyPressed && event.key.code >= 27 && event.key.code <= 35)
             {
                 int number = event.key.code - 26;
                 GameSettings::world.getPlayer().currentBlock = number;
+            }
+            if (event.type == Event::KeyPressed && event.key.code == Keyboard::E)
+            {
+                GameSettings::inventoryOpened = !GameSettings::inventoryOpened;
             }
         }
 

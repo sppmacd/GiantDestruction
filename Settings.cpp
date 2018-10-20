@@ -132,15 +132,68 @@ void ScreenRenderer::drawGUI()
 
     for(unsigned int i = 0; i < 10; i++)
     {
+        Player* player = &GameSettings::world.getPlayer();
+
         // equipped block
         Sprite sprite;
         sprite.setTexture(ScreenSettings::getTexture("terrain"));
-        sprite.setTextureRect(IntRect(i*64,64*15,64,64));
+        sprite.setTextureRect(IntRect(player->inventory.getItem(i,0).id*64,64*15,64,64));
         sprite.setScale(0.6f, 0.6f);
         if(i != GameSettings::world.getPlayer().currentBlock)
-            sprite.setColor(Color(80,80,80));
-        sprite.setPosition(300.f + i * 45.f,10.f);
+            sprite.setColor(Color(255,255,255,200));
+        sprite.setPosition(345.f + i * 45.f,10.f);
         ScreenSettings::window.draw(sprite);
+    }
+
+    // INVENTORY
+    ScreenRenderer::drawInventory();
+}
+
+void ScreenRenderer::drawInventory()
+{
+    ScreenSettings::window.setView(ScreenSettings::currentInventoryView);
+    if(GameSettings::inventoryOpened)
+    {
+        Vector2f mousePos(ScreenSettings::window.mapPixelToCoords(Mouse::getPosition(ScreenSettings::window)));
+
+        Player* player = &GameSettings::world.getPlayer();
+        for(int i = 0; i < player->inventory.getSize().x; i++)
+        for(int j = 0; j < player->inventory.getSize().y; j++)
+        {
+            RectangleShape rs(Vector2f(50.f, 50.f)); //bg
+
+            RectangleShape rs2(Vector2f(40.f, 40.f)); //item
+            rs2.setOrigin(-5.f,-5.f);
+            rs.setPosition(player->inventory.getSlotPos(i,j));
+
+            if(player->inventory.getSlotByPos(mousePos.x, mousePos.y) != Vector2i(i,j))
+                rs.setFillColor(Color(128,128,128));
+            if(j == 0) //hotbar
+            {
+                if(player->inventory.getSlotByPos(mousePos.x, mousePos.y) != Vector2i(i,j))
+                    rs.setFillColor(Color(255,64,64));
+                else
+                    rs.setFillColor(Color(128,64,64));
+            }
+
+            rs2.setPosition(player->inventory.getSlotPos(i,j));
+            rs2.setOutlineColor(Color::Red);
+            rs2.setOutlineThickness(1.f);
+            rs2.setTexture(&ScreenSettings::getTexture("items"));
+            rs2.setTextureRect(IntRect(player->inventory.getItem(i,j).id*64,0,64,64));
+            ScreenSettings::window.draw(rs);
+            ScreenSettings::window.draw(rs2);
+        }
+
+        if(GameSettings::currentPickedItem.id != 0)
+        {
+            RectangleShape rs3(Vector2f(40.f, 40.f));
+            rs3.setOrigin(20.f,20.f);
+            rs3.setPosition(mousePos);
+            rs3.setTexture(&ScreenSettings::getTexture("items"));
+            rs3.setTextureRect(IntRect(GameSettings::currentPickedItem.id*64,0,64,64));
+            ScreenSettings::window.draw(rs3);
+        }
     }
 }
 
@@ -207,6 +260,7 @@ void ScreenSettings::loadTextures()
     loadTexture("leaves");
     loadTexture("structure");
     loadTexture("player");
+    loadTexture("items");
     ScreenRenderer::drawLoadingProgress("Loading resources", "Fonts");
     ScreenSettings::font.loadFromFile("res/arial.ttf");
 }
