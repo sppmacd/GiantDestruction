@@ -17,6 +17,7 @@ RenderWindow window;
 namespace GameSettings
 {
 World world;
+bool loaded = false;
 }
 
 int main()
@@ -25,10 +26,13 @@ int main()
     ScreenSettings::window.setView(ScreenSettings::currentWorldView);
     ScreenSettings::window.setVerticalSyncEnabled(true);
 
+    ScreenRenderer::drawLoadingProgress("Loading game", "Loading renderer");
+
     ScreenSettings::currentWorldView = ScreenSettings::window.getDefaultView();
     ScreenSettings::currentGUIView = ScreenSettings::window.getDefaultView();
     ScreenSettings::loadTextures();
-    ScreenSettings::zoom = 1.f;
+    GameSettings::world.init();
+    GameSettings::loaded = true;
 
     while (ScreenSettings::window.isOpen())
     {
@@ -43,6 +47,11 @@ int main()
             {
                 Vector2f pos = ScreenSettings::screenPosToB2(ScreenSettings::window.mapPixelToCoords(Vector2i(event.mouseButton.x, event.mouseButton.y)));
                 GameSettings::world.placeBlock(pos.x, pos.y);
+            }
+            if (event.type == Event::KeyPressed && event.key.code >= 27 && event.key.code <= 35)
+            {
+                int number = event.key.code - 26;
+                GameSettings::world.getPlayer().currentBlock = number;
             }
         }
 

@@ -11,6 +11,7 @@ public:
     float health;
     float airTime;
     bool disableVelReset;
+    unsigned currentBlock;
 
     Player();
     Vector2f velocity;

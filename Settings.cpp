@@ -1,4 +1,5 @@
 #include "Settings.h"
+#include "WorldBlockSettings.h"
 
 map<string,Texture> ScreenSettings::textures;
 View ScreenSettings::currentGUIView;
@@ -32,21 +33,21 @@ View ScreenSettings::currentGUIView;
 const int blockHTV[][4][4] =
 {
     {{0,29,0,0},{0,32,0,64},{32,32,64,64},{32,29,64,0}}, //PLATE    0
-    {{0,32,0,0},{32,32,0,64},{32,32,64,64},{32,0,64,0}}, //45U       1
+    {{0,32,0,0},{32,32,0,64},{32,32,64,64},{32,0,64,0}}, //45U      1
     {{0,0,0,0},{0,32,0,64},{0,32,64,64},{32,32,64,0}}, //45D        2
     {{0,0,0,0},{0,32,0,64},{32,32,64,64},{32,0,64,0}}, //FULL       3
     {{0,32,0,0},{32,32,0,64},{32,32,64,64},{32,16,64,0}}, //225UD   4
     {{0,16,0,0},{0,32,0,64},{32,32,64,64},{32,0,64,0}}, //225UU     5
     {{0,0,0,0},{0,32,0,64},{32,32,64,64},{32,16,64,0}}, //225DU     6
     {{0,16,0,0},{0,32,0,64},{0,32,64,64},{32,32,64,0}}, //225DD     7
-    {{0,32,0,0},{32,32,0,64},{32,0,64,64},{16,0,64,0}}, //675UD     8 v
+    {{0,32,0,0},{32,32,0,64},{32,0,64,64},{16,0,64,0}}, //675UD     8
     {{16,32,0,0},{32,32,0,64},{32,32,64,64},{32,0,64,0}}, //675UU   9
     {{0,0,0,0},{0,32,0,64},{0,32,64,64},{16,32,64,0}}, //675DU      a
-    {{16,0,0,0},{0,0,0,64},{0,32,64,64},{32,32,64,0}}, //675DD      b v
-    {{8,0,0,0},{24,0,0,64},{24,32,64,64},{24,0,64,0}}, //VPLIIAR    c v
+    {{16,0,0,0},{0,0,0,64},{0,32,64,64},{32,32,64,0}}, //675DD      b
+    {{8,0,0,0},{24,0,0,64},{24,32,64,64},{8,32,64,0}}, //VPILLAR    c v
     {{0,8,0,0},{0,24,0,64},{32,24,64,64},{32,8,64,0}}, //HPILLAR    d
     {{8,8,0,0},{8,24,0,64},{24,24,64,64},{24,8,64,0}}, //CPILLAR    e
-    {{0,0,0,0},{0,0,0,64},{0,0,64,64},{0,0,64,0}} //STRUCTURE f
+    {{0,0,0,0},{0,0,0,64},{0,0,64,64},{0,0,64,0}} //STRUCTURE       f
 };
 
 void GameSettings::saveDefaultWorld()
@@ -87,6 +88,7 @@ Vector2f ScreenSettings::screenPosToB2(Vector2f vec)
 
 void ScreenRenderer::drawGUI()
 {
+    static Clock fpsclock;
     //health bar
     RectangleShape rsFilledHB(Vector2f(200.f, 20.f));
     rsFilledHB.setFillColor(Color(200,200,200));
@@ -117,11 +119,29 @@ void ScreenRenderer::drawGUI()
             " T: "+to_string(block.blockType) +
             " HT: "+to_string(block.heightType) +
             " M: "+to_string(block.meta) +
-            " F: "+to_string(block.flags),
+            " F: "+to_string(block.flags) + string("\n") +
+           "FPS: "+to_string(round(1.f/fpsclock.restart().asSeconds())),
           ScreenSettings::font,15
           );
-    text.setPosition(10.f, 40.f);
+    text.setPosition(10.f, 60.f);
     ScreenSettings::window.draw(text);
+
+    RectangleShape rsb(Vector2f(425.f, 50.f));
+    rsb.setPosition(335.f, 5.f);
+    ScreenSettings::window.draw(rsb);
+
+    for(unsigned int i = 0; i < 10; i++)
+    {
+        // equipped block
+        Sprite sprite;
+        sprite.setTexture(ScreenSettings::getTexture("terrain"));
+        sprite.setTextureRect(IntRect(i*64,64*15,64,64));
+        sprite.setScale(0.6f, 0.6f);
+        if(i != GameSettings::world.getPlayer().currentBlock)
+            sprite.setColor(Color(80,80,80));
+        sprite.setPosition(300.f + i * 45.f,10.f);
+        ScreenSettings::window.draw(sprite);
+    }
 }
 
 float ScreenSettings::getBlockSize()
@@ -129,9 +149,65 @@ float ScreenSettings::getBlockSize()
     return 32.f;
 }
 
+void ScreenRenderer::drawLoadingProgress(string header, string text)
+{
+    View currentView = ScreenSettings::window.getView();
+    ScreenSettings::window.setView(ScreenSettings::window.getDefaultView());
+    static Font font;
+    static bool fontLoaded = false;
+    static bool fontLoadFailure = false;
+    static int anim = 0;
+    static bool isFadeOut = false;
+
+    if(isFadeOut)
+    {
+        if(--anim == 0)
+            isFadeOut = false;
+    }
+    else
+    {
+        if(++anim > 30)
+            isFadeOut = true;
+    }
+
+    if(!fontLoaded && !fontLoadFailure)
+    {
+        if(font.loadFromFile("res/arial.ttf"))
+            fontLoaded = true;
+        else
+            fontLoadFailure = true;
+    }
+
+    if(fontLoaded)
+    {
+        ScreenSettings::window.clear(Color(221, 246, 255));
+        Text tx(header, font, 40);
+        tx.setPosition(ScreenSettings::window.getSize().x / 2 - tx.getLocalBounds().width / 2, ScreenSettings::window.getSize().y / 2 - 100);
+        tx.setFillColor(Color(200-anim*2,30,30));
+        ScreenSettings::window.draw(tx);
+
+        tx.move(0.f,200.f);
+        tx.setFillColor(Color(30,200-anim*2,30));
+        tx.setString(text);
+        ScreenSettings::window.draw(tx);
+    }
+    else
+    {
+        ScreenSettings::window.clear(Color(221-anim*4, 246, 255));
+    }
+
+    ScreenSettings::window.display();
+    ScreenSettings::window.setView(currentView);
+}
+
 void ScreenSettings::loadTextures()
 {
+    ScreenRenderer::drawLoadingProgress("Loading resources", "Textures");
     loadTexture("terrain");
+    loadTexture("leaves");
+    loadTexture("structure");
+    loadTexture("player");
+    ScreenRenderer::drawLoadingProgress("Loading resources", "Fonts");
     ScreenSettings::font.loadFromFile("res/arial.ttf");
 }
 void ScreenSettings::loadTexture(string name)
@@ -173,18 +249,55 @@ void ScreenRenderer::drawBlock(RenderWindow& wnd, World::Block block, int x, int
     Vector2f bpos = ScreenSettings::b2PosToScreen(Vector2f(x,y));
     //int arr[4][4] = ;
     int alpha = block.hasFlag(BlockFlags::WORLD_BACK_LAYER) ? 100 : 255;
-    auto arr = blockHTV[block.heightType];
 
-    VertexArray varr(Quads, 4);
+    if(block.heightType != BlockHeightType::HT_STRUCTURE_BLOCK)
+    {
+        VertexArray varr(Quads, 4);
+        auto arr = blockHTV[block.heightType];
+        if(block.blockType != BlockType::TYPE_LEAVES)
+        {
+            varr.append(sf::Vertex(Vector2f(arr[0][0]+bpos.x,arr[0][1]+bpos.y), Color(255,255,255,alpha),
+                                   Vector2f(arr[0][2]+block.blockType*64,arr[0][3]+block.meta*64)));
+            varr.append(sf::Vertex(Vector2f(arr[1][0]+bpos.x,arr[1][1]+bpos.y), Color(255,255,255,alpha),
+                                   Vector2f(arr[1][2]+block.blockType*64,arr[1][3]+block.meta*64)));
+            varr.append(sf::Vertex(Vector2f(arr[2][0]+bpos.x,arr[2][1]+bpos.y), Color(255,255,255,alpha),
+                                   Vector2f(arr[2][2]+block.blockType*64,arr[2][3]+block.meta*64)));
+            varr.append(sf::Vertex(Vector2f(arr[3][0]+bpos.x,arr[3][1]+bpos.y), Color(255,255,255,alpha),
+                                   Vector2f(arr[3][2]+block.blockType*64,arr[3][3]+block.meta*64)));
+        }
 
-    varr.append(sf::Vertex(Vector2f(arr[0][0]+bpos.x,arr[0][1]+bpos.y), Color(255,255,255,alpha),
-                           Vector2f(arr[0][2]+block.blockType*64,arr[0][3]+block.meta*64)));
-    varr.append(sf::Vertex(Vector2f(arr[1][0]+bpos.x,arr[1][1]+bpos.y), Color(255,255,255,alpha),
-                           Vector2f(arr[1][2]+block.blockType*64,arr[1][3]+block.meta*64)));
-    varr.append(sf::Vertex(Vector2f(arr[2][0]+bpos.x,arr[2][1]+bpos.y), Color(255,255,255,alpha),
-                           Vector2f(arr[2][2]+block.blockType*64,arr[2][3]+block.meta*64)));
-    varr.append(sf::Vertex(Vector2f(arr[3][0]+bpos.x,arr[3][1]+bpos.y), Color(255,255,255,alpha),
-                           Vector2f(arr[3][2]+block.blockType*64,arr[3][3]+block.meta*64)));
-
-    wnd.draw(varr, &ScreenSettings::getTexture("terrain"));
+        World::Block floor = GameSettings::world.getBlock(x,y+1);
+        if(block.blockType == BlockType::TYPE_WOOD && block.heightType == BlockHeightType::HT_VERTICAL_PILLAR && floor.heightType != 3 && floor.blockType != BlockType::TYPE_WOOD && floor.blockType != BlockType::TYPE_AIR)
+        {
+            varr.append(sf::Vertex(Vector2f(arr[0][0]+bpos.x,arr[0][1]+bpos.y+32.f), Color(255,255,255,alpha),
+                               Vector2f(arr[0][2]+block.blockType*64,arr[0][3]+block.meta*64)));
+            varr.append(sf::Vertex(Vector2f(arr[1][0]+bpos.x,arr[1][1]+bpos.y+32.f), Color(255,255,255,alpha),
+                               Vector2f(arr[1][2]+block.blockType*64,arr[1][3]+block.meta*64)));
+            varr.append(sf::Vertex(Vector2f(arr[2][0]+bpos.x,arr[2][1]+bpos.y+32.f), Color(255,255,255,alpha),
+                               Vector2f(arr[2][2]+block.blockType*64,arr[2][3]+block.meta*64)));
+            varr.append(sf::Vertex(Vector2f(arr[3][0]+bpos.x,arr[3][1]+bpos.y+32.f), Color(255,255,255,alpha),
+                               Vector2f(arr[3][2]+block.blockType*64,arr[3][3]+block.meta*64)));
+        }
+        if(block.blockType == BlockType::TYPE_LEAVES)
+        {
+            Sprite sprite;
+            sprite.setTexture(ScreenSettings::getTexture("leaves"));
+            sprite.setOrigin(64.f,64.f);
+            sprite.setScale(0.5f, 0.5f);
+            sprite.setPosition(bpos);
+            //sprite.setColor(Color(255,255,255,alpha));
+            wnd.draw(sprite);
+        }
+        wnd.draw(varr, &ScreenSettings::getTexture("terrain"));
+    }
+    else
+    {
+        Sprite sprite;
+        sprite.setTexture(ScreenSettings::getTexture("structure"));
+        sprite.setTextureRect(IntRect(block.blockType*64,0,64,64));
+        sprite.setScale(0.5f, 0.5f);
+        sprite.setPosition(bpos);
+        sprite.setColor(Color(255,255,255,alpha));
+        wnd.draw(sprite);
+    }
 }

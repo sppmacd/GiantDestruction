@@ -15,6 +15,7 @@ void Player::respawn()
     airTime = 0;
     velocity = Vector2f(0.f, 0.f);
     damagedOnFall = false;
+    currentBlock = 1;
 }
 
 Vector2f Player::getPosition()
@@ -48,13 +49,17 @@ void Player::move(float x, float y, bool disableVelocityResetting)
     }
     else //Reset player stat on collide
     {
-        if(!damagedOnFall)
+        if(y != 0.f)
         {
-            if(y != 0.f) velocity.y = 0.f;
-            if(x != 0.f) velocity.x = 0.f;
-            if(y > 0.f)
+            jumping = false;
+            velocity.y = 0.f;
+        }
+        if(x != 0.f) velocity.x = 0.f;
+
+        if(y > 0.f)
+        {
+            if(!damagedOnFall)
             {
-                jumping = false;
                 if((airTime - 3) > 0.f)
                     damage((airTime - 3));
                 airTime = 0;
@@ -66,13 +71,14 @@ void Player::move(float x, float y, bool disableVelocityResetting)
 
 FloatRect Player::getRect()
 {
-    return FloatRect(position.x+0.1f, position.y+0.1f, 0.8f, 2.9f);
+    return FloatRect(position.x-0.4f, position.y-2.9f, 0.8f, 2.9f);
 }
 
 void Player::jump()
 {
     if(!jumping)
     {
+        move(0.f, -0.1f);
         velocity += Vector2f(0.f, -0.2f);
         jumping = true;
         damagedOnFall = false;
@@ -84,9 +90,6 @@ void Player::update()
     move(velocity.x, velocity.y);
     if(health <= 0.f)
         respawn();
-
-    if(GameSettings::world.isCollided(getRect().left, getRect().top + 0.1f, getRect().width, getRect().height) && !jumping)
-        velocity = Vector2f(0.f,0.f);
 }
 
 Vector2f Player::getScreenPosition() //inverts Y!

@@ -18,6 +18,7 @@ class World
     Player player;
 public:
     World();
+    void init();
     virtual ~World();
     struct Block
     {
@@ -31,7 +32,7 @@ public:
         void unsetFlag(unsigned flag);
         FloatRect getRect(int x, int y);
         Block(unsigned short code);
-        Block() : Block(0) {}
+        Block() : Block(1) {}
     };
 
     bool isCollided(float x, float y, float sx, float sy);

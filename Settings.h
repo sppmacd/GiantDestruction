@@ -20,6 +20,7 @@ float getBlockSize();
 void loadTextures();
 void loadTexture(string name);
 Texture& getTexture(string name);
+void makeZoom(float zoom);
 }
 
 namespace GameSettings
@@ -27,6 +28,7 @@ namespace GameSettings
 extern World world;
 extern const int WORLD_SIZE_X;
 extern const int WORLD_SIZE_Y;
+extern bool loaded;
 
 void saveDefaultWorld();
 }
@@ -38,4 +40,5 @@ namespace ScreenRenderer
 void drawWorld();
 void drawBlock(RenderWindow& wnd, World::Block block, int x, int y);
 void drawGUI();
+void drawLoadingProgress(string header, string text);
 }
