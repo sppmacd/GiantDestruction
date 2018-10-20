@@ -110,7 +110,7 @@ void ScreenRenderer::drawGUI()
     ScreenSettings::window.setView(ScreenSettings::currentGUIView);
 
     World::Block block = GameSettings::world.getBlock(pos.x,pos.y);
-    Text text(string("Giant Destruction v1.0 [beta] [build ")+string(__DATE__)+" "+string(__TIME__)+string("]\n")+
+    Text text(string("Giant Destruction v1.0 [alpha] [build ")+string(__DATE__)+" "+string(__TIME__)+string("]\n")+
           "Mx: "+to_string(Mouse::getPosition().x) + "\n"+
           "My: "+to_string(Mouse::getPosition().y) + "\n"+
           "Bx: "+to_string(int(pos.x)) + "\n"+
