@@ -138,7 +138,7 @@ void ScreenRenderer::drawGUI()
     rsItemBg.setOutlineThickness(2.f);
     ScreenSettings::window.draw(rsItemBg);
 
-    for(unsigned int i = 0; i < 10; i++)
+    for(unsigned int i = 0; i < 9; i++)
     {
         Player* player = &GameSettings::world.getPlayer();
 
