@@ -61,7 +61,7 @@ int main()
             }
             if (event.type == Event::KeyPressed && event.key.code >= 27 && event.key.code <= 35)
             {
-                int number = event.key.code - 26;
+                int number = event.key.code - 27;
                 GameSettings::world.getPlayer().currentBlock = number;
             }
             if (event.type == Event::KeyPressed && event.key.code == Keyboard::E)
