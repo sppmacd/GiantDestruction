@@ -175,7 +175,7 @@ void World::placeBlock(int x, int y)
         World::Block block2 = getBlock(x, y);
         World::Block blockCeil = getBlock(x, y - 1);
 
-        if(block2.blockType == 0 && !isCollidedWithPlayer(x, y))
+        if(block2.blockType == 0 && !isCollidedWithPlayer(x, y) && player.inventory.getItem(player.currentBlock,0).id != 0)
         {
             block.blockType = player.inventory.getItem(player.currentBlock,0).id;
             block.flags = 0;

@@ -15,7 +15,7 @@ void Player::respawn()
     airTime = 0;
     velocity = Vector2f(0.f, 0.f);
     damagedOnFall = false;
-    currentBlock = 1;
+    currentBlock = 0;
 
     inventory.clear();
 
