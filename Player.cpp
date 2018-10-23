@@ -11,9 +11,13 @@ Player::Player()
 
 void Player::respawn()
 {
-    position = Vector2f(5.f, 0.f);
+    position = Vector2f(5.f, 15.f);
     health = 120.f;
     currentBlock = 0;
+    jumping = false;
+    airTime = 0;
+    velocity = Vector2f(0.f, 0.f);
+    damagedOnFall = false;
 
     inventory.clear();
 

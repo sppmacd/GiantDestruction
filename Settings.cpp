@@ -103,6 +103,11 @@ void ScreenRenderer::drawGUI()
     rsHealthBar.setPosition(Vector2f(10.f,10.f));
     ScreenSettings::window.draw(rsHealthBar);
 
+    Text lifeText(to_string(GameSettings::world.getPlayer().health) + " / 120", ScreenSettings::font, 16);
+    lifeText.setPosition(15.f, 10.f);
+    lifeText.setFillColor(Color(30,30,30));
+    ScreenSettings::window.draw(lifeText);
+
     //debug info
 
     ScreenSettings::window.setView(ScreenSettings::currentWorldView);
@@ -137,6 +142,7 @@ void ScreenRenderer::drawGUI()
     rsItemBg.setOutlineColor(Color(200,50,50));
     rsItemBg.setOutlineThickness(2.f);
     ScreenSettings::window.draw(rsItemBg);
+
 
     for(unsigned int i = 0; i < 9; i++)
     {

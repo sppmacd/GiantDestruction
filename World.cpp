@@ -111,7 +111,7 @@ void World::update()
     }
 
     if(player->getPosition().y > 40.f)
-        respawnPlayer(5.f, 0.f);
+        respawnPlayer(5.f, 15.f);
 }
 
 void World::acceleratePlayer(float x, float y)
