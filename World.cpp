@@ -86,43 +86,59 @@ World::~World()
     {
         delete ch.second;
     }
+    for(auto entity : entities)
+    {
+        delete entity;
+    }
 }
 
 World::World()
 {
+    Player* pl = new Player; //PL not P1
+    spawnEntity(pl);
+    player = pl;
 }
 
 void World::update()
 {
-    ScreenSettings::currentWorldView.setCenter(player.getScreenPosition());
-    acceleratePlayer(0.f, 0.0106f);
-    player.update();
+    ScreenSettings::currentWorldView.setCenter(player->getScreenPosition());
 
-    if(player.getPosition().y > 40.f)
+    for(unsigned int i = 0; i < entities.size(); i++)
+    {
+        Entity* entity = entities[i];
+        entity->update();
+        entity->velocity += Vector2f(0.f, 0.0106f);
+    }
+
+    if(player->getPosition().y > 40.f)
         respawnPlayer(5.f, 0.f);
 }
 
 void World::acceleratePlayer(float x, float y)
 {
-    player.velocity += Vector2f(x,y);
+    player->velocity += Vector2f(x,y);
 }
 
 void World::jump()
 {
-    player.jump();
+    player->jump();
 }
 
-bool World::isCollided(float x, float y, float sx, float sy)
+bool World::isCollided(float x, float y, float sx, float sy, bool includeHouses)
 {
     bool collide = false;
     for(int i = int(x)-3; i < int(x)+3; i++)
     for(int j = 0; j < GameSettings::WORLD_SIZE_Y+1; j++)
     {
-        //cout << player.getRect().left << "," << player.getRect().top << endl;
+        //cout << player->getRect().left << "," << player->getRect().top << endl;
         //cout << blocks[i][j].getRect(i,j).left << "," << blocks[i][j].getRect(i,j).top << endl;
         //cout << blocks[i][j].flags << endl;
         Block b = getBlock(i,j);
         bool t = b.getRect(i,j).intersects(FloatRect(x,y,sx,sy)) && !(b.flags & BlockFlags::WORLD_BACK_LAYER);
+
+        if(includeHouses && (b.blockType == BlockType::TYPE_DOORS || b.blockType == BlockType::TYPE_WINDOWS || b.blockType == BlockType::TYPE_BRICK))
+            t = false;
+
         if(t)
         {
             collide = true;
@@ -150,12 +166,12 @@ void World::setBlock(int _x, int _y, World::Block& block)
 
 bool World::isCollidedWithPlayer(int x, int y)
 {
-    return player.getRect().intersects(getBlock(x,y).getRect(x,y));
+    return player->getRect().intersects(getBlock(x,y).getRect(x,y));
 }
 
 void World::movePlayer(float x, float y, bool disableReset)
 {
-    player.move(x,y,disableReset);
+    player->move(x,y,disableReset);
 }
 
 void World::placeBlock(int x, int y)
@@ -175,9 +191,9 @@ void World::placeBlock(int x, int y)
         World::Block block2 = getBlock(x, y);
         World::Block blockCeil = getBlock(x, y - 1);
 
-        if(block2.blockType == 0 && !isCollidedWithPlayer(x, y) && player.inventory.getItem(player.currentBlock,0).id != 0)
+        if(block2.blockType == 0 && !isCollidedWithPlayer(x, y) && player->inventory.getItem(player->currentBlock,0).id != 0)
         {
-            block.blockType = player.inventory.getItem(player.currentBlock,0).id;
+            block.blockType = player->inventory.getItem(player->currentBlock,0).id;
             block.flags = 0;
             block.heightType = BlockHeightType::HT_FULL_BlOCK;
             block.meta = BlockMetadata::META_DEFAULT;
@@ -210,6 +226,11 @@ void World::placeBlock(int x, int y)
     }
 }
 
+void World::spawnEntity(Entity* entity)
+{
+    entities.push_back(entity);
+}
+
 World::Block World::getBlock(int _x, int _y)
 {
     if(_x < 0 || _y < 0)
@@ -238,15 +259,15 @@ float ScreenSettings::zoom;
 
 void World::respawnPlayer(float x, float y)
 {
-    player.respawn();
-    player.setPosition(x,y);
+    player->respawn();
+    player->setPosition(x,y);
 }
 
 void World::draw(RenderWindow& wnd)
 {
     float bsize = ScreenSettings::getBlockSize();
-    int startX = player.getScreenPosition().x/bsize;
-    //int startY = player.getScreenPosition().y/bsize;
+    int startX = player->getScreenPosition().x/bsize;
+    //int startY = player->getScreenPosition().y/bsize;
 
     float iend = startX + 24;
 
@@ -263,11 +284,22 @@ void World::draw(RenderWindow& wnd)
     }
 
     //player
-    RectangleShape rs(Vector2f(bsize, bsize*3.f));
+    /*RectangleShape rs(Vector2f(bsize, bsize*3.f));
     rs.setOrigin(bsize/2, bsize*3.f);
-    rs.setPosition(player.getScreenPosition());
+    rs.setPosition(player->getScreenPosition());
     rs.setTexture(&ScreenSettings::getTexture("player"));
-    wnd.draw(rs);
+    wnd.draw(rs);*/
+
+    for(unsigned int i = 0; i < entities.size(); i++)
+    {
+        Entity* entity = entities[i];
+
+        RectangleShape rs(Vector2f(entity->getRect().width * (bsize+0.1f), entity->getRect().height * (bsize+0.1f)));
+        rs.setOrigin(entity->getRect().width * (bsize+0.1f) / 2, entity->getRect().height * (bsize+0.1f));
+        rs.setPosition(entity->getScreenPosition());
+        rs.setTexture(&ScreenSettings::getTexture("player"));
+        wnd.draw(rs);
+    }
 
     ////////////////////////////
     // block info and outline //
@@ -290,7 +322,7 @@ bool World::Block::hasFlag(unsigned flag)
 
 Player& World::getPlayer()
 {
-    return player;
+    return *player;
 }
 
 void World::Block::setFlag(unsigned flag)

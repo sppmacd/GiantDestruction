@@ -15,7 +15,8 @@ class Chunk;
 
 class World
 {
-    Player player;
+    Player* player;
+    vector<Entity*> entities;
 public:
     World();
     void init();
@@ -35,7 +36,7 @@ public:
         Block() : Block(1) {}
     };
 
-    bool isCollided(float x, float y, float sx, float sy);
+    bool isCollided(float x, float y, float sx, float sy, bool includeHouses = false);
     bool isCollidedWithPlayer(int x, int y);
     void update();
     void movePlayer(float x, float y, bool disableReset = false);
@@ -44,6 +45,7 @@ public:
     Player& getPlayer();
     void jump();
     void loadFromFile(int chunkId);
+    void spawnEntity(Entity* entity);
     void respawnPlayer(float x, float y);
     void setBlock(int x, int y, Block& block);
     Block getBlock(int x, int y);
