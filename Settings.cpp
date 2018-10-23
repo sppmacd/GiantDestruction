@@ -103,9 +103,10 @@ void ScreenRenderer::drawGUI()
     rsHealthBar.setPosition(Vector2f(10.f,10.f));
     ScreenSettings::window.draw(rsHealthBar);
 
-    Text lifeText(to_string(GameSettings::world.getPlayer().health) + " / 120", ScreenSettings::font, 16);
-    lifeText.setPosition(15.f, 10.f);
+    Text lifeText(to_string(int(GameSettings::world.getPlayer().health)) + " / 120", ScreenSettings::font, 16);
+    lifeText.setPosition(110.f, 15.f);
     lifeText.setFillColor(Color(30,30,30));
+    lifeText.setOrigin(lifeText.getLocalBounds().width / 2.f, lifeText.getLocalBounds().height / 2.f);
     ScreenSettings::window.draw(lifeText);
 
     //debug info
