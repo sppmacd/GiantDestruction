@@ -97,6 +97,12 @@ World::World()
     Player* pl = new Player; //PL not P1
     spawnEntity(pl);
     player = pl;
+
+    for(int i = 0; i < 20; i++)
+    {
+        Entity* e1 = new Entity(Vector2f(rand() % GameSettings::WORLD_SIZE_X, 9.f)); //E1 not EL
+        spawnEntity(e1);
+    }
 }
 
 void World::update()
@@ -294,11 +300,14 @@ void World::draw(RenderWindow& wnd)
     {
         Entity* entity = entities[i];
 
-        RectangleShape rs(Vector2f(entity->getRect().width * (bsize+0.1f), entity->getRect().height * (bsize+0.1f)));
-        rs.setOrigin(entity->getRect().width * (bsize+0.1f) / 2, entity->getRect().height * (bsize+0.1f));
-        rs.setPosition(entity->getScreenPosition());
-        rs.setTexture(&ScreenSettings::getTexture("player"));
-        wnd.draw(rs);
+        if(entity->shown)
+        {
+            RectangleShape rs(Vector2f(entity->getRect().width * (bsize+0.1f), entity->getRect().height * (bsize+0.1f)));
+            rs.setOrigin(entity->getRect().width * (bsize+0.1f) / 2, entity->getRect().height * (bsize+0.1f));
+            rs.setPosition(entity->getScreenPosition());
+            rs.setTexture(&ScreenSettings::getTexture("player"));
+            wnd.draw(rs);
+        }
     }
 
     ////////////////////////////

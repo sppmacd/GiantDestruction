@@ -11,6 +11,30 @@ public:
     float airTime;
     bool disableVelReset;
     float jumpForce;
+    bool shown;
+
+    enum Type
+    {
+        ENTITY_NORMAL,
+        ENTITY_PLAYER,
+        ENTITY_UNDEFINED
+    };
+
+    enum CollisionType
+    {
+        COLLTYPE_INVALID = -1,
+        COLLTYPE_NONE = 0,
+        COLLTYPE_UP,
+        COLLTYPE_DOWN,
+        COLLTYPE_RIGHT,
+        COLLTYPE_LEFT,
+        COLLTYPE_UP_RIGHT,
+        COLLTYPE_UP_LEFT,
+        COLLTYPE_DOWN_RIGHT,
+        COLLTYPE_DOWN_LEFT
+    };
+
+    Type type;
 
     Entity(Vector2f startPos);
     virtual ~Entity();
@@ -23,7 +47,7 @@ public:
 
     Vector2f getPosition();
 
-    void move(float x, float y, bool disableVelocityResetting = false);
+    CollisionType move(float x, float y, bool disableVelocityResetting = false);
 
     void damage(float amount);
 
@@ -36,5 +60,11 @@ protected:
 
     bool damagedOnFall;
 private:
+
+    //// AI ////
+
+    bool dir; //true if left
+    int timer;
+    bool speeding; //true if the person is running away from giant
 
 };

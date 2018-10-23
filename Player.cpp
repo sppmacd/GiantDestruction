@@ -7,6 +7,7 @@ Player::Player()
 {
     respawn();
     jumpForce = 0.2f;
+    type = Entity::ENTITY_PLAYER;
 }
 
 void Player::respawn()
@@ -17,7 +18,7 @@ void Player::respawn()
     jumping = false;
     airTime = 0;
     velocity = Vector2f(0.f, 0.f);
-    damagedOnFall = false;
+    damagedOnFall = true; //to force not damaging on spawn
 
     inventory.clear();
 
