@@ -3,7 +3,7 @@
 #include "config.hpp"
 
 Player::Player()
-: Entity(Vector2f(5.f, 15.f))
+: Entity(Vector2f(5.f, 15.f)), inventory(Inventory(Vector2f(400.f, 400.f)))
 {
     respawn();
     jumpForce = 0.2f;
@@ -26,6 +26,7 @@ void Player::respawn()
     {
         Item item;
         item.id = i;
+        item.count = 1;
         inventory.setItem((i-1) % 9, (i-1) / 9, item);
     }
 }

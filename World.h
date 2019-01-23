@@ -16,8 +16,9 @@ class Chunk;
 class World
 {
     Player* player;
-    vector<Entity*> entities;
 public:
+    vector<Entity*> entities;
+
     World();
     void init();
     virtual ~World();
@@ -47,7 +48,7 @@ public:
     void loadFromFile(int chunkId);
     void spawnEntity(Entity* entity);
     void respawnPlayer(float x, float y);
-    void setBlock(int x, int y, Block& block);
+    void setBlock(int x, int y, Block block);
     Block getBlock(int x, int y);
     void draw(RenderWindow& wnd);
     void addChunk(Chunk* chunk, int id);

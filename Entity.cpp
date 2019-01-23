@@ -23,6 +23,9 @@ void Entity::update()
 {
     move(velocity.x, velocity.y);
 
+    if(hurtTime > 0)
+        hurtTime--;
+
     //// AI /////
 
     if(type == Entity::ENTITY_NORMAL)
@@ -89,7 +92,7 @@ void Entity::update()
         if(!(rand() % 100))
             dir = !dir;
 
-        // Handle speeding from giant
+        // Handle "speeding" from giant
         float distGiant = GameSettings::world.getPlayer().getPosition().x - position.x;
         if(distGiant > -3.f && distGiant < 0.f)
         {
@@ -146,6 +149,8 @@ void Entity::damage(float amount)
         health -= amount;
     else
         health = 0.f;
+
+    hurtTime = 30;
 }
 
 Entity::CollisionType Entity::move(float x, float y, bool disableVelocityResetting)
@@ -161,7 +166,10 @@ Entity::CollisionType Entity::move(float x, float y, bool disableVelocityResetti
     {
         position += Vector2f(x,y);
         if(y > 0.f)
+        {
             airTime += y * 0.2f / jumpForce;
+            damagedOnFall = false;
+        }
     }
     else //Reset player stat on collide
     {

@@ -52,7 +52,7 @@ void World::loadFromFile(int chunkId)
 
             //cout << "[" << blockX << "," << blockY << "]: A:" << int(a) << " B:" << int(b) << " C: 0x" << hex << blockCode << "; ";
             Block block(blockCode);
-            chunk->setBlock(blockX, blockY, block); //nie dziala powyzej 8!
+            chunk->setBlock(blockX, blockY, block);
 
             blockY++;
             if(blockY >= 18)
@@ -153,7 +153,7 @@ bool World::isCollided(float x, float y, float sx, float sy, bool includeHouses)
     }
     return collide;
 }
-void World::setBlock(int _x, int _y, World::Block& block)
+void World::setBlock(int _x, int _y, World::Block block)
 {
     if(_x < 0 || _y < 0)
         return;
@@ -161,13 +161,13 @@ void World::setBlock(int _x, int _y, World::Block& block)
     int x = _x;
     int y = _y;
 
-    if(chunks.count((x-(x%9))/9))
+    if(chunks.count(x/9))
     {
-        Chunk* chunk = chunks[(x-(x%9))/9];
+        Chunk* chunk = chunks[x/9];
         chunk->setBlock(x%9,y,block);
     }
     else
-        loadFromFile((x-(x%9))/9);
+        loadFromFile(x/9);
 }
 
 bool World::isCollidedWithPlayer(int x, int y)
@@ -197,15 +197,25 @@ void World::placeBlock(int x, int y)
         World::Block block2 = getBlock(x, y);
         World::Block blockCeil = getBlock(x, y - 1);
 
-        if(block2.blockType == 0 && !isCollidedWithPlayer(x, y) && player->inventory.getItem(player->currentBlock,0).id != 0)
+        if(block2.blockType == 0 && !isCollidedWithPlayer(x, y) && player->inventory.getItem(player->currentBlock,0).id != 0) //Place Block
         {
             block.blockType = player->inventory.getItem(player->currentBlock,0).id;
             block.flags = 0;
             block.heightType = BlockHeightType::HT_FULL_BlOCK;
             block.meta = BlockMetadata::META_DEFAULT;
             setBlock(x, y, block);
+
+            // check block
+            /*for(Entity* entity: entities)
+            {
+                if(isCollided(entity->getRect().left, entity->getRect().top, entity->getRect().width, entity->getRect().height, false))
+                {
+                    setBlock(x, y, 1);
+                    return;
+                }
+            }*/
         }
-        else
+        else //Destroy Block
         {
             block.blockType = 0;
             block.flags |= BlockFlags::WORLD_BACK_LAYER;
@@ -214,6 +224,8 @@ void World::placeBlock(int x, int y)
             {
                 for(int i = y; getBlock(x,i+1).blockType != BlockType::TYPE_LEAVES && i > 0; i--)
                 {
+                    Block pickUp = getBlock(x, i);
+                    player->inventory.addItem(Item(pickUp.blockType, 0, 1)); //Drop item
                     setBlock(x, i, block);
                 }
             }
@@ -221,11 +233,15 @@ void World::placeBlock(int x, int y)
             {
                 for(int i = y-1; getBlock(x,i+1).blockType != BlockType::TYPE_LEAVES && i > 0; i--)
                 {
+                    Block pickUp = getBlock(x, i);
+                    player->inventory.addItem(Item(pickUp.blockType, 0, 1)); //Drop item
                     setBlock(x, i, block);
                 }
             }
             else
             {
+                Block pickUp = getBlock(x, y);
+                player->inventory.addItem(Item(pickUp.blockType, 0, 1)); //Drop item
                 setBlock(x, y, block);
             }
         }
@@ -245,18 +261,18 @@ World::Block World::getBlock(int _x, int _y)
     int x = _x;
     int y = _y;
 
-    if(chunks.count((x-(x%9))/9))
+    if(chunks.count(x/9))
     {
         if(x < 0 || x >= GameSettings::WORLD_SIZE_X || y < 0)
             return World::Block(); //air
         else if(y >= 18)
             return World::Block(0x13F0); //stone
         else
-            return chunks[(x-(x%9))/9]->getBlock(x%9,y);
+            return chunks[x/9]->getBlock(x%9,y);
     }
     else
     {
-        loadFromFile((x-(x%9))/9);
+        loadFromFile(x/9);
         return World::Block();
     }
 }
@@ -289,13 +305,6 @@ void World::draw(RenderWindow& wnd)
         }
     }
 
-    //player
-    /*RectangleShape rs(Vector2f(bsize, bsize*3.f));
-    rs.setOrigin(bsize/2, bsize*3.f);
-    rs.setPosition(player->getScreenPosition());
-    rs.setTexture(&ScreenSettings::getTexture("player"));
-    wnd.draw(rs);*/
-
     for(unsigned int i = 0; i < entities.size(); i++)
     {
         Entity* entity = entities[i];
@@ -306,6 +315,8 @@ void World::draw(RenderWindow& wnd)
             rs.setOrigin(entity->getRect().width * (bsize+0.1f) / 2, entity->getRect().height * (bsize+0.1f));
             rs.setPosition(entity->getScreenPosition());
             rs.setTexture(&ScreenSettings::getTexture("player"));
+            if(entity->hurtTime > 0)
+                rs.setFillColor(Color(255, 135 + entity->hurtTime*4, 135 + entity->hurtTime*4));
             wnd.draw(rs);
         }
     }

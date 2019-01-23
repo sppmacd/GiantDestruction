@@ -8,7 +8,7 @@ class Player : public Entity
 public:
     unsigned currentBlock;
 
-    Inventory<9,3> inventory;
+    Inventory inventory;
 
     Player();
     void inventoryOnClick(Vector2i mousePos);

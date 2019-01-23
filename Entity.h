@@ -12,6 +12,7 @@ public:
     bool disableVelReset;
     float jumpForce;
     bool shown;
+    int hurtTime;
 
     enum Type
     {
@@ -65,6 +66,6 @@ private:
 
     bool dir; //true if left
     int timer;
-    bool speeding; //true if the person is running away from giant
+    bool speeding; //true if the entity is running away from giant
 
 };

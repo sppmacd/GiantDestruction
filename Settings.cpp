@@ -172,42 +172,11 @@ void ScreenRenderer::drawInventory()
         Vector2f mousePos(ScreenSettings::window.mapPixelToCoords(Mouse::getPosition(ScreenSettings::window)));
 
         Player* player = &GameSettings::world.getPlayer();
-        for(int i = 0; i < player->inventory.getSize().x; i++)
-        for(int j = 0; j < player->inventory.getSize().y; j++)
-        {
-            RectangleShape rs(Vector2f(50.f, 50.f)); //bg
-
-            RectangleShape rs2(Vector2f(40.f, 40.f)); //item
-            rs2.setOrigin(-5.f,-5.f);
-            rs.setPosition(player->inventory.getSlotPos(i,j));
-
-            if(player->inventory.getSlotByPos(mousePos.x, mousePos.y) != Vector2i(i,j))
-                rs.setFillColor(Color(128,128,128));
-            if(j == 0) //hotbar
-            {
-                if(player->inventory.getSlotByPos(mousePos.x, mousePos.y) != Vector2i(i,j))
-                    rs.setFillColor(Color(128,64,64));
-                else
-                    rs.setFillColor(Color(255,64,64));
-            }
-
-            rs2.setPosition(player->inventory.getSlotPos(i,j));
-            rs2.setOutlineColor(Color::Red);
-            rs2.setOutlineThickness(1.f);
-            rs2.setTexture(&ScreenSettings::getTexture("items"));
-            rs2.setTextureRect(IntRect(player->inventory.getItem(i,j).id*64,0,64,64));
-            ScreenSettings::window.draw(rs);
-            ScreenSettings::window.draw(rs2);
-        }
+        player->inventory.draw();
 
         if(GameSettings::currentPickedItem.id != 0)
         {
-            RectangleShape rs3(Vector2f(40.f, 40.f));
-            rs3.setOrigin(20.f,20.f);
-            rs3.setPosition(mousePos);
-            rs3.setTexture(&ScreenSettings::getTexture("items"));
-            rs3.setTextureRect(IntRect(GameSettings::currentPickedItem.id*64,0,64,64));
-            ScreenSettings::window.draw(rs3);
+            ScreenRenderer::drawItem(GameSettings::currentPickedItem, mousePos);
         }
     }
 }
@@ -215,6 +184,26 @@ void ScreenRenderer::drawInventory()
 float ScreenSettings::getBlockSize()
 {
     return 32.f;
+}
+
+void ScreenRenderer::drawItem(Item item, Vector2f pos)
+{
+    RectangleShape rs3(Vector2f(40.f, 40.f));
+    rs3.setOrigin(20.f,20.f);
+    rs3.setPosition(pos);
+    rs3.setTexture(&ScreenSettings::getTexture("items"));
+    rs3.setTextureRect(IntRect(item.id*64,0,64,64));
+    ScreenSettings::window.draw(rs3);
+
+    Text text(to_string(item.count), ScreenSettings::font, 15);
+    text.setPosition(pos + Vector2f(10.f, 10.f));
+    text.setOutlineColor(Color::Black);
+    text.setOutlineThickness(1.f);
+    ScreenSettings::window.draw(text);
+
+    text.setString(to_string(item.damage));
+    text.setPosition(pos - Vector2f(10.f, 10.f));
+    ScreenSettings::window.draw(text);
 }
 
 void ScreenRenderer::drawLoadingProgress(string header, string text)
@@ -297,7 +286,7 @@ void ScreenRenderer::drawWorld()
     varr[0].position = Vector2f(0.f, -600.f);
     varr[0].color = Color(0,0,0);
 
-    varr[1].position = Vector2f(ScreenSettings::getBlockSize() * GameSettings::WORLD_SIZE_X, -300.f);
+    varr[1].position = Vector2f(ScreenSettings::getBlockSize() * GameSettings::WORLD_SIZE_X, -600.f);
     varr[1].color = Color(0,0,0);
 
     varr[2].position = Vector2f(ScreenSettings::getBlockSize() * GameSettings::WORLD_SIZE_X, ScreenSettings::getBlockSize() * GameSettings::WORLD_SIZE_Y);

@@ -45,4 +45,5 @@ void drawBlock(RenderWindow& wnd, World::Block block, int x, int y);
 void drawGUI();
 void drawInventory();
 void drawLoadingProgress(string header, string text);
+void drawItem(Item item, Vector2f pos);
 }
