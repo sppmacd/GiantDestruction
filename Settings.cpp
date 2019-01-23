@@ -116,7 +116,7 @@ void ScreenRenderer::drawGUI()
     ScreenSettings::window.setView(ScreenSettings::currentGUIView);
 
     World::Block block = GameSettings::world.getBlock(pos.x,pos.y);
-    Text text(string("Giant Destruction v1.0 [alpha] [build ")+string(__DATE__)+" "+string(__TIME__)+string("]\n")+
+    Text text(string("Giant Destruction v1.0 [alpha] [build: ")+string(__DATE__)+" "+string(__TIME__)+string("]\n")+
           "Mx: "+to_string(Mouse::getPosition().x) + "\n"+
           "My: "+to_string(Mouse::getPosition().y) + "\n"+
           "Bx: "+to_string(int(pos.x)) + "\n"+
@@ -126,7 +126,9 @@ void ScreenRenderer::drawGUI()
             " HT: "+to_string(block.heightType) +
             " M: "+to_string(block.meta) +
             " F: "+to_string(block.flags) + string("\n") +
-           "FPS: "+to_string(round(1.f/fpsclock.restart().asSeconds())),
+          "FPS: "+to_string(round(1.f/fpsclock.restart().asSeconds())) + "\n"+
+          string("Splitting: ")+to_string(GameSettings::splitting) + string("\n") +
+          string("SplitCount: ")+to_string(GameSettings::currentSplittedItemSlots.size()),
           ScreenSettings::font,15
           );
     text.setPosition(10.f, 60.f);
@@ -144,20 +146,11 @@ void ScreenRenderer::drawGUI()
     rsItemBg.setOutlineThickness(2.f);
     ScreenSettings::window.draw(rsItemBg);
 
-
+    // hotbar
     for(unsigned int i = 0; i < 9; i++)
     {
         Player* player = &GameSettings::world.getPlayer();
-
-        // equipped block
-        Sprite sprite;
-        sprite.setTexture(ScreenSettings::getTexture("items"));
-        sprite.setTextureRect(IntRect(player->inventory.getItem(i,0).id*64,0,64,64));
-        sprite.setScale(0.6f, 0.6f);
-        if(i != GameSettings::world.getPlayer().currentBlock)
-            sprite.setColor(Color(255,255,255,200));
-        sprite.setPosition(345.f + i * 45.f,10.f);
-        ScreenSettings::window.draw(sprite);
+        ScreenRenderer::drawItem(player->inventory.getItem(i, 0), Vector2f(365.f + i * 45.f,30.f));
     }
 
     // INVENTORY
@@ -177,6 +170,16 @@ void ScreenRenderer::drawInventory()
         if(GameSettings::currentPickedItem.id != 0)
         {
             ScreenRenderer::drawItem(GameSettings::currentPickedItem, mousePos);
+
+            if(GameSettings::splitting)
+            {
+                int slotSize = GameSettings::currentPickedItem.count / GameSettings::currentSplittedItemSlots.size();
+                for(Vector2i slot: GameSettings::currentSplittedItemSlots)
+                {
+                    Item split(GameSettings::currentPickedItem.id, GameSettings::currentPickedItem.damage, slotSize);
+                    ScreenRenderer::drawItem(split, player->inventory.getSlotPos(slot.x, slot.y), true);
+                }
+            }
         }
     }
 }
@@ -186,24 +189,27 @@ float ScreenSettings::getBlockSize()
     return 32.f;
 }
 
-void ScreenRenderer::drawItem(Item item, Vector2f pos)
+void ScreenRenderer::drawItem(Item item, Vector2f pos, bool split)
 {
     RectangleShape rs3(Vector2f(40.f, 40.f));
     rs3.setOrigin(20.f,20.f);
     rs3.setPosition(pos);
     rs3.setTexture(&ScreenSettings::getTexture("items"));
     rs3.setTextureRect(IntRect(item.id*64,0,64,64));
+
+    if(split)
+        rs3.setFillColor(Color(128,128,128));
+
     ScreenSettings::window.draw(rs3);
 
-    Text text(to_string(item.count), ScreenSettings::font, 15);
-    text.setPosition(pos + Vector2f(10.f, 10.f));
-    text.setOutlineColor(Color::Black);
-    text.setOutlineThickness(1.f);
-    ScreenSettings::window.draw(text);
-
-    text.setString(to_string(item.damage));
-    text.setPosition(pos - Vector2f(10.f, 10.f));
-    ScreenSettings::window.draw(text);
+    if(item.count > 1)
+    {
+        Text text(to_string(item.count), ScreenSettings::font, 15);
+        text.setPosition(pos + Vector2f(10.f, 10.f));
+        text.setOutlineColor(Color::Black);
+        text.setOutlineThickness(1.f);
+        ScreenSettings::window.draw(text);
+    }
 }
 
 void ScreenRenderer::drawLoadingProgress(string header, string text)

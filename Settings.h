@@ -31,6 +31,8 @@ extern const int WORLD_SIZE_X;
 extern const int WORLD_SIZE_Y;
 extern bool loaded;
 extern Item currentPickedItem;
+extern vector<Vector2i> currentSplittedItemSlots;
+extern bool splitting;
 extern bool inventoryOpened;
 
 void saveDefaultWorld();
@@ -45,5 +47,5 @@ void drawBlock(RenderWindow& wnd, World::Block block, int x, int y);
 void drawGUI();
 void drawInventory();
 void drawLoadingProgress(string header, string text);
-void drawItem(Item item, Vector2f pos);
+void drawItem(Item item, Vector2f pos, bool split = false);
 }

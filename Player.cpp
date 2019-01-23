@@ -51,3 +51,46 @@ void Player::inventoryOnClick(Vector2i mousePos)
     else
         inventory.onPut(slot.x, slot.y);
 }
+
+void Player::inventoryOnSplit(Vector2i mousePos)
+{
+    Vector2i slot = inventory.getSlotByPos(mousePos.x, mousePos.y);
+    if(!GameSettings::currentSplittedItemSlots.empty() && GameSettings::currentSplittedItemSlots.back() != slot)
+    {
+        if(inventory.getItem(slot.x, slot.y).id == ItemType::ITEMTYPE_AIR || (inventory.getItem(slot.x, slot.y).id == GameSettings::currentPickedItem.id && inventory.getItem(slot.x, slot.y).count + GameSettings::currentPickedItem.count <= 32))
+        {
+            GameSettings::currentSplittedItemSlots.push_back(slot);
+            GameSettings::splitting = true;
+        }
+    }
+}
+
+void Player::inventoryOnRightClick(Vector2i mousePos)
+{
+    Vector2i slot = inventory.getSlotByPos(mousePos.x, mousePos.y);
+    Item item = inventory.getItem(slot.x, slot.y);
+
+    if(item.count + 1 <= 32 && GameSettings::currentPickedItem.count - 1 >=0 && ((item.id == GameSettings::currentPickedItem.id && item.damage == GameSettings::currentPickedItem.damage) || item.id == 0))
+    {
+        inventory.setItem(slot.x, slot.y, Item(GameSettings::currentPickedItem.id, GameSettings::currentPickedItem.damage, ++item.count));
+        GameSettings::currentPickedItem.count--;
+    }
+}
+
+void Player::inventoryOnDoubleClick(Vector2i mousePos)
+{
+    Vector2i slot = inventory.getSlotByPos(mousePos.x, mousePos.y);
+    inventory.onDoubleClickSlot(slot.x, slot.y);
+}
+
+void Player::inventoryOnSplitFinished()
+{
+    int slotSize = GameSettings::currentPickedItem.count / GameSettings::currentSplittedItemSlots.size();
+
+    for(Vector2i slot: GameSettings::currentSplittedItemSlots)
+    {
+        inventory.setItem(slot.x, slot.y, Item(GameSettings::currentPickedItem.id, GameSettings::currentPickedItem.damage, slotSize));
+    }
+
+    GameSettings::currentPickedItem = Item(GameSettings::currentPickedItem.id, GameSettings::currentPickedItem.damage, GameSettings::currentPickedItem.count - slotSize * GameSettings::currentSplittedItemSlots.size());
+}

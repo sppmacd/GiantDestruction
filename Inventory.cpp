@@ -1,6 +1,9 @@
 #include "Inventory.h"
 #include "Settings.h"
 
+vector<Vector2i> GameSettings::currentSplittedItemSlots;
+bool GameSettings::splitting;
+
 void Inventory::draw()
 {
     for(int i = 0; i < sizeX; i++)

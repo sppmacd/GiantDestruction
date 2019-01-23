@@ -38,6 +38,8 @@ int main()
     GameSettings::world.init();
     GameSettings::loaded = true;
 
+    Clock lastClickCounter;
+
     while (ScreenSettings::window.isOpen())
     {
         ScreenSettings::window.setView(ScreenSettings::currentWorldView);
@@ -49,14 +51,30 @@ int main()
                 ScreenSettings::window.close();
             if (event.type == Event::MouseButtonPressed)            // item drag and drop.
             {
-                if(!GameSettings::inventoryOpened)
+                if(event.mouseButton.button == Mouse::Left)
                 {
-                    Vector2f pos = ScreenSettings::screenPosToB2(ScreenSettings::window.mapPixelToCoords(Vector2i(event.mouseButton.x, event.mouseButton.y)));
-                    GameSettings::world.placeBlock(pos.x, pos.y);
+                    if(GameSettings::inventoryOpened)
+                    {
+                        if(lastClickCounter.getElapsedTime().asMilliseconds() > 200)
+                        {
+                            GameSettings::currentSplittedItemSlots.push_back(GameSettings::world.getPlayer().inventory.getSlotByPos(event.mouseButton.x, event.mouseButton.y));
+                        }
+                        else
+                        {
+                            GameSettings::world.getPlayer().inventoryOnDoubleClick(Vector2i(event.mouseButton.x, event.mouseButton.y));
+                        }
+                    }
+                    else
+                    {
+                        Vector2f pos = ScreenSettings::screenPosToB2(ScreenSettings::window.mapPixelToCoords(Vector2i(event.mouseButton.x, event.mouseButton.y)));
+                        GameSettings::world.placeBlock(pos.x, pos.y);
+                    }
+
+                    lastClickCounter.restart();
                 }
-                else
+                else if(event.mouseButton.button == Mouse::Right)
                 {
-                    GameSettings::world.getPlayer().inventoryOnClick(Vector2i(event.mouseButton.x, event.mouseButton.y));
+                    GameSettings::world.getPlayer().inventoryOnRightClick(Vector2i(event.mouseButton.x, event.mouseButton.y));
                 }
             }
             if (event.type == Event::KeyPressed && event.key.code >= 27 && event.key.code <= 35)
@@ -68,6 +86,29 @@ int main()
             {
                 GameSettings::inventoryOpened = !GameSettings::inventoryOpened;
             }
+            if (event.type == Event::MouseMoved)
+            {
+                if (Mouse::isButtonPressed(Mouse::Left) && GameSettings::inventoryOpened && GameSettings::currentPickedItem.id != ItemType::ITEMTYPE_AIR)
+                {
+                    GameSettings::world.getPlayer().inventoryOnSplit(Vector2i(event.mouseMove.x, event.mouseMove.y));
+                }
+            }
+            if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
+            {
+                if(GameSettings::inventoryOpened)
+                {
+                    if(GameSettings::splitting)
+                    {
+                        GameSettings::splitting = false;
+                        GameSettings::world.getPlayer().inventoryOnSplitFinished();
+                    }
+                    else
+                    {
+                        GameSettings::world.getPlayer().inventoryOnClick(Vector2i(event.mouseButton.x, event.mouseButton.y));
+                    }
+                    GameSettings::currentSplittedItemSlots.clear();
+                }
+            }
         }
 
         if(Keyboard::isKeyPressed(Keyboard::D)) GameSettings::world.movePlayer(0.2f, 0.f, true);
@@ -75,11 +116,13 @@ int main()
 
         if(Keyboard::isKeyPressed(Keyboard::W)) GameSettings::world.jump();
         // shovel - right button
-        // kopary
+
         if(Keyboard::isKeyPressed(Keyboard::S)) GameSettings::world.movePlayer(0.f, 0.2f, true);
 
         // UPDATE GAME LOGIC
         GameSettings::world.update();
+        if(GameSettings::currentPickedItem.count == 0)
+            GameSettings::currentPickedItem = 0;
 
         // RENDER GAME
         ScreenSettings::window.clear();

@@ -91,7 +91,11 @@ public:
     void setItem(int slotX, int slotY, Item item)
     {
         if(slotX >= 0 && slotX < sizeX && slotY >= 0 && slotY < sizeY)
+        {
             items[slotX * sizeY + slotY] = item;
+            if(item.count == 0)
+                items[slotX * sizeY + slotY] = 0;
+        }
     }
 
     void addItem(Item item)
@@ -112,7 +116,13 @@ public:
                     return;
                 }
             }
-            else if(item2.id == ItemType::ITEMTYPE_AIR)
+        }
+
+        for(int i = 0; i < sizeX; i++)
+        for(int j = 0; j < sizeY; j++)
+        {
+            Item item2 = getItem(i,j);
+            if(item2.id == ItemType::ITEMTYPE_AIR)
             {
                 setItem(i,j,item);
                 return;
@@ -165,6 +175,31 @@ public:
             {
                 setItem(slotX, slotY, it2);
                 GameSettings::currentPickedItem = item;
+            }
+        }
+    }
+
+    void onDoubleClickSlot(int slotX, int slotY)
+    {
+        Item& item = GameSettings::currentPickedItem;
+
+        for(int i = 0; i < sizeX; i++)
+        for(int j = 0; j < sizeY; j++)
+        {
+            Item item2 = getItem(i,j);
+            if(item2.id == item.id && item2.damage == item.damage)
+            {
+                if(item2.count + item.count <= 32)
+                {
+                    item.count += item2.count;
+                    setItem(i,j,0);
+                }
+                else
+                {
+                    item2.count += item.count - 32;
+                    item.count = 32;
+                    setItem(i, j, item2);
+                }
             }
         }
     }
